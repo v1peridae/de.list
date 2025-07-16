@@ -10,7 +10,8 @@ import { AstroFont } from "astro-font";
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>de.list</title>
-  </head><body class="flex flex-col items-center justify-center h-screen">
+  </head>
+  <body class="flex flex-col items-center justify-center h-screen">
     <h1 class="titles font-bold mt-0 pt-0 text-7xl">de.list</h1>
     <p class="text-3xl font-color subtitle">for yappers who love to read</p>
 
@@ -18,5 +19,15 @@ import { AstroFont } from "astro-font";
       <p class="text-center text-2xl font-bold mb-1 button"><a href="/login">log in</a></p>
       <p class="text-center text-2xl font-bold button"><a href="/signup">sign up</a></p>
     </div>
+
+    <script>
+      import { auth } from "../firebase/config";
+      import { onAuthStateChanged } from "firebase/auth";
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          window.location.href = "/home";
+        }
+      });
+    </script>
   </body>
 </html>
