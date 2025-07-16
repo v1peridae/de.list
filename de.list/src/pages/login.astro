@@ -1,0 +1,79 @@
+---
+import "../styles/global.css";
+import { AstroFont } from "astro-font";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>de.list</title>
+    <AstroFont
+      config={[
+        {
+          name: "Lateef",
+          src: [
+            {
+              weight: "200",
+              style: "normal",
+              path: "/Lateef/Lateef-ExtraLight.ttf",
+            },
+            {
+              weight: "300",
+              style: "normal",
+              path: "/Lateef/Lateef-Light.ttf",
+            },
+            {
+              weight: "400",
+              style: "normal",
+              path: "/Lateef/Lateef-Regular.ttf",
+            },
+            {
+              weight: "500",
+              style: "normal",
+              path: "/Lateef/Lateef-Medium.ttf",
+            },
+            {
+              weight: "600",
+              style: "normal",
+              path: "/Lateef/Lateef-SemiBold.ttf",
+            },
+            {
+              weight: "700",
+              style: "normal",
+              path: "/Lateef/Lateef-Bold.ttf",
+            },
+            {
+              weight: "800",
+              style: "normal",
+              path: "/Lateef/Lateef-ExtraBold.ttf",
+            },
+          ],
+          preload: true,
+          display: "swap",
+          selector: "body",
+          fallback: "sans-serif",
+        },
+      ]}
+    />
+  </head>
+  <body class="bg-[#DEE791] flex flex-col items-center justify-center h-screen">
+    <h1 class="text-6xl font-bold mt-0 pt-0">de.list</h1>
+
+    <div class="flex flex-col gap-2 mt-24 w-full max-w-md px-4">
+      <form class="flex flex-col gap-2">
+        <input type="email" placeholder="email" class="bg-transparent border-b-2 border-black text-3xl outline-none border-none" />
+        <input type="password" placeholder="password" class="bg-transparent border-b-2 border-black text-3xl outline-none border-none" />
+        <div class="flex justify-between items-center mt-6">
+          <button type="button" class="text-black text-lg font-bold">wanna make an account?</button>
+          <button type="button" class="text-black text-lg font-bold ml-3">forgot password?</button>
+        </div>
+        <button type="button" class="text-black text-2xl font-bold mt-6">sign in with google</button>
+        <div class="flex justify-center mt-6">--------------------------------------------</div>
+        <button type="submit" class="bg-black text-white text-2xl font-bold mt-4">login</button>
+      </form>
+    </div>
+  </body>
+</html>
