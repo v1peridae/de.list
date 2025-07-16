@@ -10,62 +10,13 @@ import { AstroFont } from "astro-font";
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>de.list</title>
-    <AstroFont
-      config={[
-        {
-          name: "Lateef",
-          src: [
-            {
-              weight: "200",
-              style: "normal",
-              path: "/Lateef/Lateef-ExtraLight.ttf",
-            },
-            {
-              weight: "300",
-              style: "normal",
-              path: "/Lateef/Lateef-Light.ttf",
-            },
-            {
-              weight: "400",
-              style: "normal",
-              path: "/Lateef/Lateef-Regular.ttf",
-            },
-            {
-              weight: "500",
-              style: "normal",
-              path: "/Lateef/Lateef-Medium.ttf",
-            },
-            {
-              weight: "600",
-              style: "normal",
-              path: "/Lateef/Lateef-SemiBold.ttf",
-            },
-            {
-              weight: "700",
-              style: "normal",
-              path: "/Lateef/Lateef-Bold.ttf",
-            },
-            {
-              weight: "800",
-              style: "normal",
-              path: "/Lateef/Lateef-ExtraBold.ttf",
-            },
-          ],
-          preload: true,
-          display: "swap",
-          selector: "body",
-          fallback: "sans-serif",
-        },
-      ]}
-    />
-  </head>
-  <body class="bg-[#DEE791] flex flex-col items-center justify-center h-screen">
-    <h1 class="text-6xl font-bold mt-0 pt-0">de.list</h1>
-    <p class="text-3xl text-[#000]">for yappers who love to read</p>
+  </head><body class="flex flex-col items-center justify-center h-screen">
+    <h1 class="titles font-bold mt-0 pt-0 text-7xl">de.list</h1>
+    <p class="text-3xl font-color subtitle">for yappers who love to read</p>
 
     <div class="flex flex-col gap-2 mt-30">
-      <p class="text-center text-2xl font-bold mb-1"><a href="/login">login</a></p>
-      <p class="text-center text-2xl font-bold"><a href="/signup">sign up</a></p>
+      <p class="text-center text-2xl font-bold mb-1 button"><a href="/login">log in</a></p>
+      <p class="text-center text-2xl font-bold button"><a href="/signup">sign up</a></p>
     </div>
   </body>
 </html>
