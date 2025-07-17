@@ -35,6 +35,80 @@ import "../styles/global.css";
       </div>
     </div>
 
+    <div id="bookModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+      <div class="bg-[#e8e3c8] p-8 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-start mb-6">
+          <h2 class="text-4xl font-bold titles">add to de.list</h2>
+          <button id="closeModal" class="text-3xl hover:opacity-70">&times;</button>
+        </div>
+
+        <div class="flex gap-8">
+          <div class="flex-shrink-0">
+            <div class="text-center">
+              <div id="modalBookCover" class="w-48 h-72 bg-black flex items-center justify-center text-white text-lg mb-4">BOOK COVER</div>
+              <input
+                type="text"
+                id="modalBookTitle"
+                placeholder="book name"
+                class="w-48 bg-transparent border-b-2 border-black text-center subtitle text-lg outline-none mb-2"
+              />
+              <div class="text-sm subtitle space-y-1">
+                <div>
+                  <span>started reading: </span>
+                  <input type="date" id="startedReading" class="bg-transparent border-b border-black subtitle text-sm outline-none" />
+                  <span class="text-xs opacity-60"> (optional)</span>
+                </div>
+                <div>
+                  <span>finished reading: </span>
+                  <input type="date" id="finishedReading" class="bg-transparent border-b border-black subtitle text-sm outline-none" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex-1">
+            <div class="mb-6">
+              <label class="block subtitle text-lg mb-2">my notes about it:</label>
+              <textarea
+                id="bookNotes"
+                placeholder="write your thoughts, quotes, reflections..."
+                class="w-full h-40 bg-transparent border-2 border-black p-4 subtitle resize-none outline-none"></textarea>
+            </div>
+
+            <div class="mb-6">
+              <label class="block subtitle text-lg mb-2">favourite sections:</label>
+              <textarea
+                id="favouriteSections"
+                placeholder="page numbers, quotes, or sections you loved..."
+                class="w-full h-24 bg-transparent border-2 border-black p-4 subtitle resize-none outline-none"></textarea>
+            </div>
+
+            <div class="mb-6">
+              <div class="flex items-center gap-4">
+                <span class="subtitle">add media!</span>
+                <button
+                  type="button"
+                  class="border-2 border-black px-4 py-2 subtitle hover:bg-black hover:text-[#e8e3c8] transition-colors"
+                >
+                  attach files
+                </button>
+              </div>
+            </div>
+
+            <div class="flex justify-end">
+              <button
+                id="submitBook"
+                type="button"
+                class="bg-black text-[#e8e3c8] px-8 py-3 subtitle text-lg hover:opacity-80 transition-opacity"
+              >
+                submit &lt;3
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
       import { initAuthGuard, addLogoutFunctionality } from "../utils/authGuard";
 
@@ -45,18 +119,55 @@ import "../styles/global.css";
         }
       });
 
-      let timeoutId;
-      const searchInput = document.getElementById("searchInput");
-      const searchResults = document.getElementById("searchResults");
+      let timeoutId: number;
+      const searchInput = document.getElementById("searchInput") as HTMLInputElement;
+      const searchResults = document.getElementById("searchResults") as HTMLElement;
+      const bookModal = document.getElementById("bookModal") as HTMLElement;
+      const closeModal = document.getElementById("closeModal") as HTMLElement;
+      const submitBook = document.getElementById("submitBook") as HTMLElement;
+
+      closeModal.addEventListener("click", () => {
+        bookModal.classList.add("hidden");
+      });
+
+      bookModal.addEventListener("click", (e) => {
+        if (e.target === bookModal) {
+          bookModal.classList.add("hidden");
+        }
+      });
+
+      submitBook.addEventListener("click", () => {
+        console.log("Saving book...");
+        bookModal.classList.add("hidden");
+      });
 
       searchInput.addEventListener("input", (e) => {
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => {
-          searchBooks(e.target.value);
+          searchBooks((e.target as HTMLInputElement).value);
         }, 500);
       });
 
-      async function searchBooks(query) {
+      function openBookModal(book: any) {
+        const modalBookCover = document.getElementById("modalBookCover") as HTMLElement;
+        const modalBookTitle = document.getElementById("modalBookTitle") as HTMLInputElement;
+        if (book.cover_i) {
+          modalBookCover.innerHTML = `<img src="https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg" alt="${book.title}" class="w-full h-full object-cover" />`;
+        } else {
+          modalBookCover.innerHTML = `<div class="text-white text-center">BOOK COVER</div>`;
+        }
+
+        modalBookTitle.value = book.title || "";
+
+        (document.getElementById("bookNotes") as HTMLTextAreaElement).value = "";
+        (document.getElementById("favouriteSections") as HTMLTextAreaElement).value = "";
+        (document.getElementById("startedReading") as HTMLInputElement).value = "";
+        (document.getElementById("finishedReading") as HTMLInputElement).value = "";
+
+        bookModal.classList.remove("hidden");
+      }
+
+      async function searchBooks(query: string) {
         if (!query) {
           searchResults.innerHTML = "";
           return;
@@ -77,11 +188,11 @@ import "../styles/global.css";
           const data = await response.json();
 
           const booksWithCovers = data.docs
-            .filter((book) => book.cover_i && book.author_name && book.author_name.length > 0 && book.first_publish_year)
+            .filter((book: any) => book.cover_i && book.author_name && book.author_name.length > 0 && book.first_publish_year)
             .slice(0, 6)
             .map(
-              (book) => `
-            <div class="book-result flex flex-col items-center text-center">
+              (book: any) => `
+            <div class="book-result flex flex-col items-center text-center cursor-pointer" data-book='${JSON.stringify(book)}'>
               <img 
                 src="https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg" 
                 alt="${book.title}" 
@@ -109,6 +220,13 @@ import "../styles/global.css";
           searchResults.innerHTML = booksWithCovers
             ? suggestionMessage + booksWithCovers
             : '<p class="subtitle text-center col-span-3">No matching books found.</p>';
+          const bookElements = searchResults.querySelectorAll(".book-result");
+          bookElements.forEach((bookElement) => {
+            bookElement.addEventListener("click", () => {
+              const bookData = JSON.parse((bookElement as HTMLElement).dataset.book || "{}");
+              openBookModal(bookData);
+            });
+          });
         } catch (error) {
           console.error("Error searching books:", error);
           searchResults.innerHTML = '<p class="subtitle text-red-500 col-span-3">Error searching books.</p>';

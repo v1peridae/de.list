@@ -11,15 +11,14 @@ import "../styles/global.css";
     <title>de.list</title>
   </head>
   <body>
-    <div class="w-full max-w-4xl mx-auto px-4 py-8">
-      <nav class="flex justify-end gap-8 mb-8">
+    <div class="w-full max-w-4xl mx-auto px-4 py-8 relative">
+      <nav class="absolute right-6 top-8 flex gap-8 items-center">
         <a href="/home" class="navbar text-3xl hover:opacity-75 transition-opacity">+</a>
         <a href="/friends" class="navbar text-3xl hover:opacity-75 transition-opacity">friends</a>
         <button type="button" onclick="alert('Profile page coming soon!')" class="navbar text-3xl">profile</button>
         <button type="button" data-logout class="navbar text-3xl">logout</button>
       </nav>
       <h1 class="text-6xl font-bold text-center mb-16">de.list</h1>
-
       <div class="flex gap-8">
         <div class="w-2/3">
           <h2 class="title text-3xl mb-6">your friends</h2>
