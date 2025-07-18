@@ -1,0 +1,103 @@
+---
+import "../styles/global.css";
+import { AstroFont } from "astro-font";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>de.list</title>
+  </head>
+  <body class="flex flex-col items-center justify-center h-screen">
+    <h1 class="text-6xl font-bold mt-0 pt-0">de.list</h1>
+
+    <div class="flex flex-col gap-2 mt-16 w-full max-w-md px-4">
+      <form class="flex flex-col gap-2" id="signupForm">
+        <input type="email" id="email" placeholder="email" class="bg-transparent border-b-2 text-3xl outline-none border-none subtitle" />
+        <input
+          type="password"
+          id="password"
+          placeholder="password"
+          class="bg-transparent border-b-2 text-3xl outline-none border-none subtitle"
+        />
+        <input
+          type="password"
+          id="confirmPassword"
+          placeholder="confirm password"
+          class="bg-transparent border-b-2 text-3xl outline-none border-none subtitle"
+        />
+        <div class="flex justify-between items-center mt-2">
+          <a href="/login" class="navbar text-2xl">already have an account?</a>
+        </div>
+        <button type="button" id="googleSignUp" class="button mt-6 text-2xl">sign up with google</button>
+        <div class="flex justify-center">--------------------------------------------</div>
+        <button type="submit" class="button mt-2 text-2xl font-bold">sign up</button>
+      </form>
+    </div>
+
+    <script>
+      import { auth } from "../firebase/config";
+      import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+
+      const signupForm = document.getElementById("signupForm");
+      const googleSignUpButton = document.getElementById("googleSignUp");
+      const provider = new GoogleAuthProvider();
+
+      if (signupForm && googleSignUpButton) {
+        signupForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const emailInput = document.getElementById("email") as HTMLInputElement;
+          const passwordInput = document.getElementById("password") as HTMLInputElement;
+          const confirmPasswordInput = document.getElementById("confirmPassword") as HTMLInputElement;
+
+          if (!emailInput || !passwordInput || !confirmPasswordInput) return;
+
+          if (passwordInput.value !== confirmPasswordInput.value) {
+            alert("Passwords do not match!");
+            return;
+          }
+
+          if (passwordInput.value.length < 6) {
+            alert("Password must be at least 6 characters long!");
+            return;
+          }
+
+          try {
+            const userCredential = await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+            console.log("User created:", userCredential.user);
+            window.location.href = "/home";
+          } catch (error: any) {
+            console.error("Error creating user:", error);
+            if (error.code === "auth/email-already-in-use") {
+              alert("An account with this email already exists!");
+            } else if (error.code === "auth/invalid-email") {
+              alert("Please enter a valid email address!");
+            } else if (error.code === "auth/weak-password") {
+              alert("Password is too weak. Please choose a stronger password!");
+            } else {
+              alert("Failed to create account. Please try again.");
+            }
+          }
+        });
+
+        googleSignUpButton.addEventListener("click", async () => {
+          try {
+            const result = await signInWithPopup(auth, provider);
+            console.log("User signed up with Google:", result.user);
+            window.location.href = "/home";
+          } catch (error: any) {
+            console.error("Error signing up with Google:", error);
+            if (error.code === "auth/account-exists-with-different-credential") {
+              alert("An account with this email already exists with a different sign-in method!");
+            } else {
+              alert("Failed to sign up with Google. Please try again.");
+            }
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
