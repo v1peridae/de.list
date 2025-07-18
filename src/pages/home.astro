@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import Header from "../components/Header.astro";
 ---
 
 <html lang="en">
@@ -11,17 +12,7 @@ import "../styles/global.css";
     <title>de.list</title>
   </head>
   <body class="flex flex-col items-center h-screen">
-    <div class="w-full max-w-6xl px-4 relative pt-8">
-      <nav class="absolute right-6 top-8 flex gap-8 items-center">
-        <button type="button" class="navbar text-3xl ml-3">+</button>
-        <button type="button" class="navbar text-3xl ml-3"><a href="/friends">friends</a></button>
-        <button type="button" class="navbar text-3xl ml-3">profile</button>
-        <button type="button" data-logout class="navbar text-3xl ml-3">logout</button>
-      </nav>
-      <a href="/feed" class="block w-fit mx-auto">
-        <h1 class="text-6xl font-bold text-center cursor-pointer">de.list</h1>
-      </a>
-    </div>
+    <Header />
 
     <div class="flex flex-col gap-2 mt-16 w-full max-w-md px-2">
       <div class="flex flex-col gap-2 w-full">

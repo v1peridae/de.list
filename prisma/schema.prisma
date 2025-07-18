@@ -14,16 +14,15 @@ datasource db {
 }
 
 model User {
-  id          String   @id
-  email       String   @unique
+  id          String       @id
+  email       String       @unique
   name        String?
   displayName String?
-  friendCode  String   @unique
-  createdAt   DateTime @default(now())
-
-  books    Book[]
-  friends  Friendship[] @relation("UserFriends")
-  friendOf Friendship[] @relation("FriendOf")
+  friendCode  String       @unique
+  createdAt   DateTime     @default(now())
+  books       Book[]
+  friendOf    Friendship[] @relation("FriendOf")
+  friends     Friendship[] @relation("UserFriends")
 }
 
 model Book {
@@ -35,21 +34,18 @@ model Book {
   started   DateTime?
   finished  DateTime?
   createdAt DateTime  @default(now())
-
-  user   User   @relation(fields: [userId], references: [id])
-  userId String
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
 }
 
 model Friendship {
-  id       Int    @id @default(autoincrement())
-  userId   String
-  friendId String
-  status   String @default("accepted")
-
-  user   User @relation("UserFriends", fields: [userId], references: [id])
-  friend User @relation("FriendOf", fields: [friendId], references: [id])
-
+  id        Int      @id @default(autoincrement())
+  userId    String
+  friendId  String
+  status    String   @default("accepted")
   createdAt DateTime @default(now())
+  friend    User     @relation("FriendOf", fields: [friendId], references: [id])
+  user      User     @relation("UserFriends", fields: [userId], references: [id])
 
   @@unique([userId, friendId])
 }

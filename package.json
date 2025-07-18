@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@astrojs/react": "^4.3.0",
-    "@astrojs/vercel": "^8.0.4",
     "@prisma/client": "^6.12.0",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
