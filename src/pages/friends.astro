@@ -18,10 +18,8 @@ import Header from "../components/Header.astro";
       <div class="flex gap-8">
         <div class="w-2/3">
           <h2 class="title text-3xl mb-6">your friends</h2>
-          <div class="friends-list space-y-4">
-            <div>
-              <h3 class="subtitle text-xl">@everyone_2_swag</h3>
-            </div>
+          <div id="friendsList" class="friends-list space-y-4">
+            <div class="text-center subtitle text-lg text-[#687fe5] opacity-75">loading your friends...</div>
           </div>
         </div>
 
@@ -37,16 +35,40 @@ import Header from "../components/Header.astro";
               <input type="text" maxlength="1" class="w-10 h-12 bg-transparent border-b-2 border-[#687fe5] text-2xl text-center subtitle" />
               <input type="text" maxlength="1" class="w-10 h-12 bg-transparent border-b-2 border-[#687fe5] text-2xl text-center subtitle" />
             </div>
-            <button id="addFriendBtn" class="button text-xl underline mt-4"> Add Friend </button>
+            <button id="addFriendBtn" class="button text-xl underline mt-4"> add friend </button>
           </div>
 
           <div class="mt-8 pt-6 border-t border-[#687fe5] border-opacity-30">
-            <div class="flex flex-col items-center gap-3">
-              <p class="subtitle text-lg opacity-75">your friend code:</p>
-              <div class="bg-[#687fe5] bg-opacity-10 px-6 py-3 rounded-lg">
-                <span id="userFriendCode" class="subtitle text-2xl font-mono tracking-wider">------</span>
+            <div class="flex flex-col items-center gap-4">
+              <p class="subtitle text-lg opacity-75 text-left">your friend code:</p>
+              <div class="flex gap-2" id="userFriendCodeContainer">
+                <span
+                  class="w-10 h-12 bg-transparent border-b-2 border-[#687fe5] text-2xl text-center subtitle flex items-center justify-center cursor-pointer"
+                  >-</span
+                >
+                <span
+                  class="w-10 h-12 bg-transparent border-b-2 border-[#687fe5] text-2xl text-center subtitle flex items-center justify-center cursor-pointer"
+                  >-</span
+                >
+                <span
+                  class="w-10 h-12 bg-transparent border-b-2 border-[#687fe5] text-2xl text-center subtitle flex items-center justify-center cursor-pointer"
+                  >-</span
+                >
+                <span
+                  class="w-10 h-12 bg-transparent border-b-2 border-[#687fe5] text-2xl text-center subtitle flex items-center justify-center cursor-pointer"
+                  >-</span
+                >
+                <span
+                  class="w-10 h-12 bg-transparent border-b-2 border-[#687fe5] text-2xl text-center subtitle flex items-center justify-center cursor-pointer"
+                  >-</span
+                >
+                <span
+                  class="w-10 h-12 bg-transparent border-b-2 border-[#687fe5] text-2xl text-center subtitle flex items-center justify-center cursor-pointer"
+                  >-</span
+                >
               </div>
-              <p class="text-sm opacity-60 text-center">share this code with friends so they can add you</p>
+              <p class="text-lg opacity-60 text-center navbar">share this code with friends so they can add you</p>
+              <p id="copyStatus" class="text-lg opacity-60 text-center hidden navbar">copied to clipboard!</p>
             </div>
           </div>
         </div>
@@ -55,17 +77,39 @@ import Header from "../components/Header.astro";
 
     <script>
       import { initAuthGuard, addLogoutFunctionality } from "../utils/authGuard";
+      import { auth } from "../firebase/config";
 
       initAuthGuard().then((user) => {
         if (user) {
-          console.log("User authenticated:", user.email);
           addLogoutFunctionality();
           loadUserFriendCode();
+          loadFriends();
         }
       });
 
       const codeInputs = document.querySelectorAll('input[type="text"]') as NodeListOf<HTMLInputElement>;
       const addFriendBtn = document.getElementById("addFriendBtn");
+      const userFriendCodeContainer = document.getElementById("userFriendCodeContainer");
+      const copyStatusElement = document.getElementById("copyStatus");
+      const friendsList = document.getElementById("friendsList");
+
+      userFriendCodeContainer?.addEventListener("click", async () => {
+        const digitSpans = userFriendCodeContainer.querySelectorAll("span");
+        const friendCode = Array.from(digitSpans)
+          .map((span) => span.textContent)
+          .join("");
+        if (friendCode && friendCode !== "------") {
+          try {
+            await navigator.clipboard.writeText(friendCode);
+            copyStatusElement?.classList.remove("hidden");
+            setTimeout(() => {
+              copyStatusElement?.classList.add("hidden");
+            }, 2000);
+          } catch (error) {
+            console.error("Failed to copy friend code:", error);
+          }
+        }
+      });
 
       codeInputs.forEach((input, index) => {
         input.addEventListener("input", (e) => {
@@ -82,14 +126,64 @@ import Header from "../components/Header.astro";
             codeInputs[index - 1].focus();
           }
         });
+
+        input.addEventListener("paste", (e) => {
+          e.preventDefault();
+          const pastedData = e.clipboardData?.getData("text") || "";
+          const digits = pastedData.replace(/[^0-9]/g, "").slice(0, 6);
+
+          if (digits.length > 0) {
+            codeInputs.forEach((inp) => (inp.value = ""));
+
+            for (let i = 0; i < digits.length && i < codeInputs.length; i++) {
+              codeInputs[i].value = digits[i];
+            }
+
+            const nextIndex = Math.min(digits.length, codeInputs.length - 1);
+            codeInputs[nextIndex].focus();
+          }
+        });
       });
 
-      addFriendBtn?.addEventListener("click", () => {
+      addFriendBtn?.addEventListener("click", async () => {
         const code = Array.from(codeInputs)
           .map((input) => input.value)
           .join("");
-        if (code.length === 6) {
-          console.log("Friend code:", code);
+
+        if (code.length !== 6) {
+          alert("Please enter a complete 6-digit friend code");
+          return;
+        }
+
+        try {
+          const user = auth.currentUser;
+          const headers: HeadersInit = {
+            "Content-Type": "application/json",
+          };
+
+          if (user) {
+            const token = await user.getIdToken();
+            headers["Authorization"] = `Bearer ${token}`;
+          }
+
+          const response = await fetch("/api/friends", {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ friendCode: code }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            alert(`added ${data.friend.displayName} :P`);
+            codeInputs.forEach((input) => (input.value = ""));
+            loadFriends();
+          } else {
+            alert(data.error || "Failed to add friend");
+          }
+        } catch (error) {
+          console.error("Error adding friend:", error);
+          alert("Failed to add friend");
         }
       });
 
@@ -111,14 +205,80 @@ import Header from "../components/Header.astro";
 
           if (response.ok) {
             const data = await response.json();
-            const friendCodeElement = document.getElementById("userFriendCode");
-            if (friendCodeElement) {
-              friendCodeElement.textContent = data.friendCode;
+            const friendCodeContainer = document.getElementById("userFriendCodeContainer");
+            if (friendCodeContainer) {
+              const digitSpans = friendCodeContainer.querySelectorAll("span");
+              const friendCode = data.friendCode;
+              for (let i = 0; i < digitSpans.length; i++) {
+                digitSpans[i].textContent = friendCode[i] || "-";
+              }
             }
           }
         } catch (error) {
           console.error("Error loading friend code:", error);
         }
+      }
+
+      async function loadFriends() {
+        try {
+          const user = auth.currentUser;
+          const headers: HeadersInit = {
+            "Content-Type": "application/json",
+          };
+
+          if (user) {
+            const token = await user.getIdToken();
+            headers["Authorization"] = `Bearer ${token}`;
+          }
+
+          const response = await fetch("/api/friends", { headers });
+          const data = await response.json();
+
+          if (data.friends && data.friends.length > 0) {
+            renderFriends(data.friends);
+          } else {
+            friendsList!.innerHTML = `
+              <div class="text-center space-y-4">
+                <h3 class="subtitle text-xl text-[#687fe5] opacity-75">no friends yet :')</h3>
+                <p class="subtitle text-sm text-[#687fe5] opacity-50">add friends using their 6-digit code!</p>
+              </div>
+            `;
+          }
+        } catch (error) {
+          console.error("Error loading friends:", error);
+          friendsList!.innerHTML = `
+            <div class="text-center subtitle text-lg text-red-500">
+              Failed to load friends
+            </div>
+          `;
+        }
+      }
+
+      function renderFriends(friends: any[]) {
+        const friendsHtml = friends
+          .map(
+            (friend) => `
+          <div class="friend-item bg-[#feebf6] border-2 border-[#687fe5] p-4 cursor-pointer transition-all hover:shadow-lg" 
+               onclick="window.location.href='/profile?userId=${friend.id}'">
+            <div class="flex items-center gap-4">
+              <div class="w-16 h-16 bg-[#687fe5] rounded-full flex items-center justify-center text-[#feebf6] text-xl">
+                ${friend.profilePic ? `<img src="${friend.profilePic}" alt="${friend.displayName}" class="w-full h-full rounded-full object-cover" />` : "👤"}
+              </div>
+              <div class="flex-1">
+                <h3 class="titles text-lg text-[#687fe5]">${friend.displayName}</h3>
+                <p class="subtitle text-sm text-[#687fe5] opacity-75">@${friend.friendCode}</p>
+                <p class="subtitle text-xs text-[#687fe5] opacity-50">Friends since ${new Date(friend.createdAt).toLocaleDateString()}</p>
+              </div>
+              <div class="text-[#687fe5] opacity-50">
+                <span class="subtitle text-sm">view profile →</span>
+              </div>
+            </div>
+          </div>
+        `
+          )
+          .join("");
+
+        friendsList!.innerHTML = friendsHtml;
       }
     </script>
   </body>

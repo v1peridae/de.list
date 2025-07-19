@@ -18,6 +18,9 @@ model User {
   email       String       @unique
   name        String?
   displayName String?
+  username    String?      @unique
+  bio         String?
+  profilePic  String?
   friendCode  String       @unique
   createdAt   DateTime     @default(now())
   books       Book[]

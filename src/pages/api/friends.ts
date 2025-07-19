@@ -91,6 +91,93 @@ export async function GET({ request }: { request: Request }) {
       );
     }
 
+    if (action === "my-profile") {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          displayName: true,
+          username: true,
+          bio: true,
+          profilePic: true,
+          friendCode: true,
+        },
+      });
+
+      return new Response(JSON.stringify({ user }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "user-profile") {
+      const targetUserId = url.searchParams.get("userId");
+      if (!targetUserId) {
+        return new Response(JSON.stringify({ error: "User ID required" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      const friendship = await prisma.friendship.findUnique({
+        where: {
+          userId_friendId: {
+            userId: userId,
+            friendId: targetUserId,
+          },
+        },
+      });
+
+      if (!friendship && targetUserId !== userId) {
+        return new Response(JSON.stringify({ error: "You can only view friends' profiles" }), {
+          status: 403,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: targetUserId },
+        select: {
+          id: true,
+          displayName: true,
+          username: true,
+          bio: true,
+          profilePic: true,
+          friendCode: true,
+        },
+      });
+
+      if (!user) {
+        return new Response(JSON.stringify({ error: "User not found" }), {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      const books = await prisma.book.findMany({
+        where: { userId: targetUserId },
+        orderBy: { createdAt: "desc" },
+      });
+
+      const userBooks = books.map((book: any) => ({
+        id: book.id,
+        title: book.title,
+        author: book.author,
+        notes: book.notes,
+        favourite: book.favourite,
+        started: book.started,
+        finished: book.finished,
+        cover_url: null,
+      }));
+
+      return new Response(JSON.stringify({ user, books: userBooks }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "feed") {
       const friendships = await prisma.friendship.findMany({
         where: { userId: userId },
@@ -167,7 +254,6 @@ export async function GET({ request }: { request: Request }) {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error in GET /api/friends:", error);
     return new Response(JSON.stringify({ error: "Request failed" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
@@ -182,6 +268,41 @@ export async function POST({ request }: { request: Request }) {
 
     const url = new URL(request.url);
     const action = url.searchParams.get("action");
+
+    if (action === "update-profile") {
+      const { displayName, username, bio, profilePic } = body;
+
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: {
+          displayName: displayName || undefined,
+          username: username || undefined,
+          bio: bio || undefined,
+          profilePic: profilePic || undefined,
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          displayName: true,
+          username: true,
+          bio: true,
+          profilePic: true,
+          friendCode: true,
+        },
+      });
+
+      return new Response(
+        JSON.stringify({
+          message: "Profile updated successfully",
+          user: updatedUser,
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
 
     if (action === "save-book") {
       const { title, author, notes, started, finished } = body;
@@ -292,7 +413,6 @@ export async function POST({ request }: { request: Request }) {
       }
     );
   } catch (error) {
-    console.error("Error adding friend:", error);
     return new Response(JSON.stringify({ error: "Failed to add friend" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
@@ -338,7 +458,6 @@ export async function DELETE({ request }: { request: Request }) {
       }
     );
   } catch (error) {
-    console.error("Error removing friend:", error);
     return new Response(JSON.stringify({ error: "Failed to remove friend" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
