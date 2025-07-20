@@ -179,18 +179,12 @@ import Header from "../components/Header.astro";
 
         if (response.ok) {
           addToListModal.classList.add("hidden");
-          alert("Book added to your reading list!");
 
           (document.getElementById("myBookNotes") as HTMLTextAreaElement).value = "";
           (document.getElementById("myStartDate") as HTMLInputElement).value = "";
           (document.getElementById("myFinishDate") as HTMLInputElement).value = "";
-        } else {
-          alert("Failed to add book to your list");
         }
-      } catch (error) {
-        console.error("Error adding book:", error);
-        alert("Failed to add book to your list");
-      }
+      } catch (error) 
     });
 
     async function loadFeed() {

@@ -151,7 +151,7 @@ import Header from "../components/Header.astro";
           .join("");
 
         if (code.length !== 6) {
-          alert("Please enter a complete 6-digit friend code");
+          console.log("Please enter a complete 6-digit friend code");
           return;
         }
 
@@ -175,15 +175,14 @@ import Header from "../components/Header.astro";
           const data = await response.json();
 
           if (response.ok) {
-            alert(`added ${data.friend.displayName} :P`);
+            console.log(`added ${data.friend.displayName} :P`);
             codeInputs.forEach((input) => (input.value = ""));
             loadFriends();
           } else {
-            alert(data.error || "Failed to add friend");
+            console.log(data.error || "Failed to add friend");
           }
         } catch (error) {
           console.error("Error adding friend:", error);
-          alert("Failed to add friend");
         }
       });
 
@@ -258,19 +257,11 @@ import Header from "../components/Header.astro";
         const friendsHtml = friends
           .map(
             (friend) => `
-          <div class="friend-item bg-[#feebf6] border-2 border-[#687fe5] p-4 cursor-pointer transition-all hover:shadow-lg" 
+          <div class="friend-item bg-[#feebf6] border-b-1 border-[#687fe5] p-4 cursor-pointer" 
                onclick="window.location.href='/profile?userId=${friend.id}'">
             <div class="flex items-center gap-4">
-              <div class="w-16 h-16 bg-[#687fe5] rounded-full flex items-center justify-center text-[#feebf6] text-xl">
-                ${friend.profilePic ? `<img src="${friend.profilePic}" alt="${friend.displayName}" class="w-full h-full rounded-full object-cover" />` : "👤"}
-              </div>
               <div class="flex-1">
-                <h3 class="titles text-lg text-[#687fe5]">${friend.displayName}</h3>
-                <p class="subtitle text-sm text-[#687fe5] opacity-75">@${friend.friendCode}</p>
-                <p class="subtitle text-xs text-[#687fe5] opacity-50">Friends since ${new Date(friend.createdAt).toLocaleDateString()}</p>
-              </div>
-              <div class="text-[#687fe5] opacity-50">
-                <span class="subtitle text-sm">view profile →</span>
+                <h3 class="subtitle text-xl text-[#687fe5]">@${friend.username}</h3>
               </div>
             </div>
           </div>

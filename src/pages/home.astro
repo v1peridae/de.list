@@ -130,8 +130,25 @@ import Header from "../components/Header.astro";
       }
     });
 
-    submitBook.addEventListener("click", () => {
-      console.log("Saving book...");
+    submitBook.addEventListener("click", async () => {
+      const title = (document.getElementById("modalBookTitle") as HTMLElement).textContent || "";
+      const notes = (document.getElementById("bookNotes") as HTMLTextAreaElement).value;
+      const favourite = (document.getElementById("favouriteSections") as HTMLTextAreaElement).value;
+      const started = (document.getElementById("startedReading") as HTMLInputElement).value;
+      const finished = (document.getElementById("finishedReading") as HTMLInputElement).value;
+
+      const modalBookTitle = document.getElementById("modalBookTitle") as HTMLElement;
+      const bookTitle = modalBookTitle.textContent || title;
+
+      const bookData = (window as any).currentModalBook || { title: bookTitle, author_name: [""] };
+
+      await saveBook(bookData, {
+        started: started || undefined,
+        finished: finished || undefined,
+        notes: notes || undefined,
+        favourite: favourite || undefined,
+      });
+
       bookModal.classList.add("hidden");
       clearMediaPreview();
     });
@@ -210,6 +227,8 @@ import Header from "../components/Header.astro";
     });
 
     function openBookModal(book: any) {
+      (window as any).currentModalBook = book;
+
       const modalBookCover = document.getElementById("modalBookCover") as HTMLElement;
       const modalBookTitle = document.getElementById("modalBookTitle") as HTMLElement;
       if (book.cover_i) {
@@ -230,6 +249,74 @@ import Header from "../components/Header.astro";
       clearMediaPreview();
 
       bookModal.classList.remove("hidden");
+    }
+
+    function handleBookStatus(book: any, status: string | undefined) {
+      if (status === "finished") {
+        openBookModal(book);
+      } else if (status === "reading") {
+        const today = new Date().toISOString().split("T")[0];
+        saveBook(book, { started: today });
+      } else if (status === "want") {
+        saveBook(book, {});
+      }
+    }
+
+    async function saveBook(book: any, options: { started?: string; finished?: string; notes?: string; favourite?: string } = {}) {
+      try {
+        const { auth } = await import("../firebase/config");
+        const user = auth.currentUser;
+
+        if (!user) {
+          alert("Please log in to save books");
+          return;
+        }
+
+        const token = await user.getIdToken();
+
+        const bookData = {
+          title: book.title,
+          author: book.author_name?.[0] || "",
+          started: options.started || null,
+          finished: options.finished || null,
+          notes: options.notes || "",
+          favourite: options.favourite || "",
+        };
+
+        const response = await fetch("/api/books", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bookData),
+        });
+
+        if (response.ok) {
+          let message = "Book saved successfully!";
+          if (options.started && !options.finished) {
+            message = "Added to currently reading!";
+          } else if (!options.started && !options.finished) {
+            message = "Added to want to read!";
+          } else if (options.finished) {
+            message = "Added to already read!";
+          }
+
+          const successDiv = document.createElement("div");
+          successDiv.className = "fixed top-4 right-4 bg-[#687fe5] text-[#feebf6] px-4 py-2 subtitle z-50";
+          successDiv.textContent = message;
+          document.body.appendChild(successDiv);
+
+          setTimeout(() => {
+            document.body.removeChild(successDiv);
+          }, 3000);
+        } else {
+          alert("Error saving book");
+        }
+      } catch (error) {
+        console.error("Error saving book:", error);
+        alert("Error saving book");
+      }
     }
 
     async function searchBooks(query: string) {
@@ -257,12 +344,25 @@ import Header from "../components/Header.astro";
           .slice(0, 6)
           .map(
             (book: any) => `
-            <div class="book-result flex flex-col items-center text-center cursor-pointer" data-book='${JSON.stringify(book)}'>
-              <img 
-                src="https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg" 
-                alt="${book.title}" 
-                class="w-32 h-48 object-cover"
-              />
+            <div class="book-result flex flex-col items-center text-center relative group" data-book='${JSON.stringify(book)}'>
+              <div class="relative">
+                <img 
+                  src="https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg" 
+                  alt="${book.title}" 
+                  class="w-32 h-48 object-cover"
+                />
+                <div class="absolute inset-0 bg-black bg-opacity-75 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-center items-center gap-2 px-2">
+                  <button class="reading-status-btn w-full py-1 px-2 bg-[#687fe5] text-[#feebf6] text-sm subtitle hover:bg-[#feebf6] hover:text-[#687fe5] transition-colors border border-[#687fe5]" data-status="finished" data-book='${JSON.stringify(book)}'>
+                    read
+                  </button>
+                  <button class="reading-status-btn w-full py-1 px-2 bg-transparent text-[#feebf6] text-sm subtitle hover:bg-[#feebf6] hover:text-[#687fe5] transition-colors border border-[#feebf6]" data-status="reading" data-book='${JSON.stringify(book)}'>
+                    reading
+                  </button>
+                  <button class="reading-status-btn w-full py-1 px-2 bg-transparent text-[#feebf6] text-sm subtitle hover:bg-[#feebf6] hover:text-[#687fe5] transition-colors border border-[#feebf6]" data-status="want" data-book='${JSON.stringify(book)}'>
+                    will read
+                  </button>
+                </div>
+              </div>
               <div class="mt-2">
                 <h3 class="subtitle text-lg line-clamp-1">${book.title}</h3>
                 <p class="subtitle text-sm opacity-75 line-clamp-1">
@@ -286,11 +386,13 @@ import Header from "../components/Header.astro";
           ? suggestionMessage + booksWithCovers
           : '<p class="subtitle text-center col-span-3">No matching books found.</p>';
 
-        const bookElements = searchResults.querySelectorAll(".book-result");
-        bookElements.forEach((bookElement) => {
-          bookElement.addEventListener("click", () => {
-            const bookData = JSON.parse((bookElement as HTMLElement).dataset.book || "{}");
-            openBookModal(bookData);
+        const statusButtons = searchResults.querySelectorAll(".reading-status-btn");
+        statusButtons.forEach((button) => {
+          button.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const bookData = JSON.parse((button as HTMLElement).dataset.book || "{}");
+            const status = (button as HTMLElement).dataset.status;
+            handleBookStatus(bookData, status);
           });
         });
       } catch (error) {

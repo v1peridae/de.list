@@ -141,6 +141,7 @@ export async function GET({ request }: { request: Request }) {
         where: { id: targetUserId },
         select: {
           id: true,
+          name: true,
           displayName: true,
           username: true,
           bio: true,
@@ -200,7 +201,9 @@ export async function GET({ request }: { request: Request }) {
         include: {
           user: {
             select: {
+              name: true,
               displayName: true,
+              username: true,
             },
           },
         },
@@ -217,7 +220,8 @@ export async function GET({ request }: { request: Request }) {
         favourite: book.favourite,
         started: book.started,
         finished: book.finished,
-        friend_name: book.user.displayName,
+        friend_name: book.user.username || book.user.displayName,
+        friend_full_name: book.user.name,
         cover_url: null,
       }));
 
@@ -233,7 +237,9 @@ export async function GET({ request }: { request: Request }) {
         friend: {
           select: {
             id: true,
+            name: true,
             displayName: true,
+            username: true,
             email: true,
             friendCode: true,
           },
@@ -243,7 +249,9 @@ export async function GET({ request }: { request: Request }) {
 
     const friends = friendships.map((friendship: any) => ({
       id: friendship.friend.id,
+      name: friendship.friend.name,
       displayName: friendship.friend.displayName,
+      username: friendship.friend.username,
       email: friendship.friend.email,
       friendCode: friendship.friend.friendCode,
       createdAt: friendship.createdAt,
@@ -270,11 +278,26 @@ export async function POST({ request }: { request: Request }) {
     const action = url.searchParams.get("action");
 
     if (action === "update-profile") {
-      const { displayName, username, bio, profilePic } = body;
+      const { name, displayName, username, bio, profilePic } = body;
+
+      if (username) {
+        const existingUser = await prisma.user.findUnique({
+          where: { username },
+          select: { id: true },
+        });
+
+        if (existingUser && existingUser.id !== userId) {
+          return new Response(JSON.stringify({ error: "Username is already taken" }), {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+      }
 
       const updatedUser = await prisma.user.update({
         where: { id: userId },
         data: {
+          name: name || undefined,
           displayName: displayName || undefined,
           username: username || undefined,
           bio: bio || undefined,

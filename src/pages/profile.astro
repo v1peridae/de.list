@@ -1,0 +1,414 @@
+---
+import "../styles/global.css";
+import Header from "../components/Header.astro";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Profile - de.list</title>
+    <style>
+      .profile-circle {
+        border: none;
+        position: relative;
+      }
+
+      .profile-circle::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        border-radius: 50%;
+        background: url("data:image/svg+xml,%3csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='50' cy='50' r='48' fill='none' stroke='%23687fe5' stroke-width='2' stroke-dasharray='15 8' stroke-linecap='round' /%3e%3c/svg%3e")
+          center/contain no-repeat;
+        z-index: -1;
+      }
+
+      .profile-circle img {
+        position: relative;
+        z-index: 1;
+      }
+    </style>
+  </head>
+  <body class="flex flex-col items-center h-screen">
+    <Header />
+
+    <div class="flex flex-col items-center mt-16 w-full max-w-4xl px-4">
+      <div class="flex items-center justify-between w-full mb-8">
+        <div class="flex items-center gap-8">
+          <div class="relative flex-shrink-0">
+            <div id="profilePicContainer" class="profile-circle w-40 h-40 rounded-full flex items-center justify-center bg-transparent">
+              <img id="profilePic" class="w-full h-full rounded-full object-cover hidden" alt="Profile Picture" />
+              <span id="profileInitial" class="text-7xl font-bold text-[#687fe5]"></span>
+            </div>
+          </div>
+
+          <div class="text-left">
+            <h2 id="username" class="text-4xl subtitle text-[#687fe5] mb-2">@username</h2>
+            <h3 id="displayName" class="text-2xl titles text-[#687fe5]">Display Name</h3>
+            <p id="bio" class="text-lg subtitle text-[#687fe5] mt-2 max-w-md"></p>
+          </div>
+        </div>
+
+        <button
+          id="editProfileBtn"
+          class="px-6 py-2 border-2 border-[#687fe5] text-[#687fe5] button text-xl hover:bg-[#687fe5] hover:text-[#feebf6] transition-colors flex-shrink-0"
+        >
+          edit profile
+        </button>
+      </div>
+
+      <div class="w-full max-w-4xl">
+        <div class="flex justify-center mb-8">
+          <div class="flex gap-8">
+            <button
+              id="tabCurrently"
+              class="tab-button text-2xl subtitle text-[#687fe5] pb-2 border-b-2 border-[#687fe5] active"
+              data-tab="currently"
+            >
+              currently reading
+            </button>
+            <button
+              id="tabAlready"
+              class="tab-button text-2xl subtitle text-[#687fe5] pb-2 border-b-2 border-transparent hover:border-[#687fe5] opacity-60"
+              data-tab="already"
+            >
+              already read
+            </button>
+            <button
+              id="tabWant"
+              class="tab-button text-2xl subtitle text-[#687fe5] pb-2 border-b-2 border-transparent hover:border-[#687fe5] opacity-60"
+              data-tab="want"
+            >
+              want to read
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col items-center">
+          <div id="bookContent" class="w-full max-w-2xl space-y-4"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="editModal" class="fixed inset-0 flex items-center justify-center hidden z-50 bg-black bg-opacity-50">
+      <div class="bg-[#feebf6] text-[#687fe5] p-8 max-w-md w-full mx-4 border-2 border-[#687fe5]">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl titles">Edit Profile</h3>
+          <button id="closeEditModal" class="navbar text-2xl">close</button>
+        </div>
+
+        <form id="editProfileForm" class="space-y-4">
+          <div>
+            <label for="editDisplayName" class="block subtitle text-lg mb-1">Display Name</label>
+            <input
+              type="text"
+              id="editDisplayName"
+              class="w-full bg-transparent border-b-2 border-[#687fe5] outline-none subtitle text-lg pb-1"
+            />
+          </div>
+
+          <div>
+            <label for="editUsername" class="block subtitle text-lg mb-1">Username</label>
+            <input
+              type="text"
+              id="editUsername"
+              class="w-full bg-transparent border-b-2 border-[#687fe5] outline-none subtitle text-lg pb-1"
+              placeholder="without @"
+            />
+          </div>
+
+          <div>
+            <label for="editBio" class="block subtitle text-lg mb-1">Bio</label>
+            <textarea
+              id="editBio"
+              rows="3"
+              class="w-full bg-transparent border-2 border-[#687fe5] outline-none subtitle text-lg p-2 resize-none"></textarea>
+          </div>
+
+          <div>
+            <label for="editProfilePic" class="block subtitle text-lg mb-1">Profile Picture</label>
+            <input
+              type="file"
+              id="editProfilePic"
+              accept="image/*"
+              class="w-full bg-transparent border-b-2 border-[#687fe5] outline-none subtitle text-lg pb-1 file:mr-4 file:py-1 file:px-2 file:border-0 file:text-sm file:bg-[#687fe5] file:text-[#feebf6] file:subtitle"
+            />
+          </div>
+
+          <div class="flex gap-4 pt-4">
+            <button
+              type="submit"
+              class="flex-1 button text-lg py-2 border-2 border-[#687fe5] hover:bg-[#687fe5] hover:text-[#feebf6] transition-colors"
+            >
+              Save Changes
+            </button>
+            <button type="button" id="cancelEdit" class="flex-1 button text-lg py-2 text-[#687fe5] hover:underline"> Cancel </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      import { initAuthGuard } from "../utils/authGuard";
+      import type { User } from "firebase/auth";
+
+      let currentUser: User | null = null;
+      let currentlyReadingBooks: any[] = [];
+      let alreadyReadBooks: any[] = [];
+      let wantToReadBooks: any[] = [];
+      let activeTab = "currently";
+
+      async function init() {
+        try {
+          currentUser = await initAuthGuard();
+          if (currentUser) {
+            await loadUserProfile();
+            await loadUserBooks();
+          }
+        } catch (error) {
+          window.location.href = "/login";
+        }
+      }
+
+      async function loadUserProfile() {
+        if (!currentUser) return;
+
+        try {
+          const token = await currentUser.getIdToken();
+          const response = await fetch("/api/friends?action=my-profile", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          const data = await response.json();
+          const user = data.user;
+
+          if (user) {
+            const usernameEl = document.getElementById("username");
+            if (usernameEl) {
+              usernameEl.textContent = user.username ? `@${user.username}` : `@${user.friendCode}`;
+            }
+
+            const displayNameEl = document.getElementById("displayName");
+            if (displayNameEl) {
+              displayNameEl.textContent = user.displayName || user.name || "User";
+            }
+
+            const bioEl = document.getElementById("bio");
+            if (bioEl && user.bio) {
+              bioEl.textContent = user.bio;
+            }
+
+            const profilePicEl = document.getElementById("profilePic");
+            const profileInitialEl = document.getElementById("profileInitial");
+
+            if (user.profilePic && profilePicEl && profileInitialEl) {
+              (profilePicEl as HTMLImageElement).src = user.profilePic;
+              profilePicEl.classList.remove("hidden");
+              profileInitialEl.style.display = "none";
+            } else if (profileInitialEl) {
+              const name = user.displayName || user.name || user.email || "U";
+              profileInitialEl.textContent = name.charAt(0).toUpperCase();
+              if (profilePicEl) profilePicEl.classList.add("hidden");
+            }
+
+            const editDisplayName = document.getElementById("editDisplayName");
+            const editUsername = document.getElementById("editUsername");
+            const editBio = document.getElementById("editBio");
+            const editProfilePic = document.getElementById("editProfilePic");
+
+            if (editDisplayName) (editDisplayName as HTMLInputElement).value = user.displayName || "";
+            if (editUsername) (editUsername as HTMLInputElement).value = user.username || "";
+            if (editBio) (editBio as HTMLTextAreaElement).value = user.bio || "";
+          }
+        } catch (error) 
+      }
+
+      async function loadUserBooks() {
+        if (!currentUser) return;
+
+        try {
+          const token = await currentUser.getIdToken();
+          const response = await fetch(`/api/friends?action=user-profile&userId=${currentUser.uid}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          const data = await response.json();
+          const books = data.books || [];
+
+          currentlyReadingBooks = books.filter((book: any) => book.started && !book.finished);
+          alreadyReadBooks = books.filter((book: any) => book.finished);
+          wantToReadBooks = books.filter((book: any) => !book.started && !book.finished);
+
+          displayBooksForActiveTab();
+        } catch (error) {
+        }
+      }
+
+      function populateBookSection(sectionId: string, books: any[]) {
+        const section = document.getElementById(sectionId);
+        if (!section) return;
+
+        if (books.length === 0) {
+          section.innerHTML = '<p class="subtitle text-lg opacity-60">No books yet</p>';
+          return;
+        }
+
+        section.innerHTML = books
+          .map(
+            (book: any) => `
+          <div class="book-item p-3 border border-[#687fe5] text-left">
+            <h5 class="titles text-lg font-bold">${book.title}</h5>
+            ${book.author ? `<p class="subtitle text-sm opacity-80">${book.author}</p>` : ""}
+            ${book.notes ? `<p class="subtitle text-sm mt-1">${book.notes}</p>` : ""}
+          </div>
+        `
+          )
+          .join("");
+      }
+
+      function displayBooksForActiveTab() {
+        let booksToShow: any[] = [];
+
+        switch (activeTab) {
+          case "currently":
+            booksToShow = currentlyReadingBooks;
+            break;
+          case "already":
+            booksToShow = alreadyReadBooks;
+            break;
+          case "want":
+            booksToShow = wantToReadBooks;
+            break;
+        }
+
+        populateBookSection("bookContent", booksToShow);
+      }
+
+      function switchTab(tabName: string) {
+        activeTab = tabName;
+
+        const tabButtons = document.querySelectorAll(".tab-button");
+        tabButtons.forEach((button) => {
+          const btn = button as HTMLElement;
+          if (btn.dataset.tab === tabName) {
+            btn.classList.remove("opacity-60");
+            btn.classList.add("active");
+            btn.style.borderColor = "#687fe5";
+          } else {
+            btn.classList.add("opacity-60");
+            btn.classList.remove("active");
+            btn.style.borderColor = "transparent";
+          }
+        });
+
+        displayBooksForActiveTab();
+      }
+
+      const tabButtons = document.querySelectorAll(".tab-button");
+      tabButtons.forEach((button) => {
+        button.addEventListener("click", (e) => {
+          const target = e.target as HTMLElement;
+          const tabName = target.dataset.tab;
+          if (tabName) {
+            switchTab(tabName);
+          }
+        });
+      });
+
+      const editProfileBtn = document.getElementById("editProfileBtn");
+      const editModal = document.getElementById("editModal");
+      const closeEditModal = document.getElementById("closeEditModal");
+      const cancelEdit = document.getElementById("cancelEdit");
+      const editProfileForm = document.getElementById("editProfileForm");
+
+      if (editProfileBtn && editModal) {
+        editProfileBtn.addEventListener("click", () => {
+          editModal.classList.remove("hidden");
+        });
+      }
+
+      if (closeEditModal && editModal) {
+        closeEditModal.addEventListener("click", () => {
+          editModal.classList.add("hidden");
+        });
+      }
+
+      if (cancelEdit && editModal) {
+        cancelEdit.addEventListener("click", () => {
+          editModal.classList.add("hidden");
+        });
+      }
+
+      if (editProfileForm) {
+        editProfileForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          if (!currentUser || !editModal) return;
+
+          const profilePicInput = document.getElementById("editProfilePic") as HTMLInputElement;
+          let profilePicData = null;
+
+          if (profilePicInput?.files && profilePicInput.files[0]) {
+            const file = profilePicInput.files[0];
+            profilePicData = await new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onload = (e) => resolve(e.target?.result as string);
+              reader.readAsDataURL(file);
+            });
+          }
+
+          const formData = {
+            displayName: (document.getElementById("editDisplayName") as HTMLInputElement)?.value,
+            username: (document.getElementById("editUsername") as HTMLInputElement)?.value,
+            bio: (document.getElementById("editBio") as HTMLTextAreaElement)?.value,
+            profilePic: profilePicData,
+          };
+
+          try {
+            const token = await currentUser.getIdToken();
+            const response = await fetch("/api/friends?action=update-profile", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(formData),
+            });
+
+            if (response.ok) {
+              editModal.classList.add("hidden");
+              await loadUserProfile();
+            }
+          } catch (error) {
+          }
+        });
+      }
+
+      const logoutBtn = document.querySelector("[data-logout]");
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", async () => {
+          try {
+            const { signOut } = await import("firebase/auth");
+            const { auth } = await import("../firebase/config");
+            await signOut(auth);
+            window.location.href = "/login";
+          } catch (error) {
+            window.location.href = "/login";
+          }
+        });
+      }
+
+      init();
+    </script>
+  </body>
+</html>
