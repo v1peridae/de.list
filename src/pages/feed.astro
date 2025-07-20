@@ -184,7 +184,9 @@ import Header from "../components/Header.astro";
           (document.getElementById("myStartDate") as HTMLInputElement).value = "";
           (document.getElementById("myFinishDate") as HTMLInputElement).value = "";
         }
-      } catch (error) 
+      } catch (error) {
+        console.error("Error adding book:", error);
+      }
     });
 
     async function loadFeed() {
