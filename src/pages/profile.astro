@@ -228,8 +228,9 @@ import Header from "../components/Header.astro";
             if (editUsername) (editUsername as HTMLInputElement).value = user.username || "";
             if (editBio) (editBio as HTMLTextAreaElement).value = user.bio || "";
           }
-        } catch (error) 
-      }
+        } catch (error) {
+          console.error("Error loading user data:", error);
+        }
 
       async function loadUserBooks() {
         if (!currentUser) return;
@@ -403,7 +404,7 @@ import Header from "../components/Header.astro";
             await signOut(auth);
             window.location.href = "/login";
           } catch (error) {
-            window.location.href = "/login";
+            console.error("Error signing out:", error);
           }
         });
       }
