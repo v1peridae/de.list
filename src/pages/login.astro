@@ -35,11 +35,34 @@ import { AstroFont } from "astro-font";
 
     <script>
       import { auth } from "../firebase/config";
-      import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+      import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, type User } from "firebase/auth";
 
       const loginForm = document.getElementById("loginForm");
       const googleSignInButton = document.getElementById("googleSignIn");
       const provider = new GoogleAuthProvider();
+
+      async function checkProfileAndRedirect(user: User) {
+        try {
+          const token = await user.getIdToken();
+          const response = await fetch("/api/friends?action=check-profile-completion", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          const data = await response.json();
+          const isProfileComplete = data.isComplete || false;
+
+          if (isProfileComplete) {
+            window.location.href = "/home";
+          } else {
+            window.location.href = "/onboarding";
+          }
+        } catch (error) {
+          console.error("Error checking profile completion:", error);
+          window.location.href = "/home";
+        }
+      }
 
       if (loginForm && googleSignInButton) {
         loginForm.addEventListener("submit", async (e) => {
@@ -51,7 +74,7 @@ import { AstroFont } from "astro-font";
 
           try {
             const userCredential = await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
-            window.location.href = "/home";
+            await checkProfileAndRedirect(userCredential.user);
           } catch (error: any) {
             console.error("Error signing in:", error);
             if (error.code === "auth/user-not-found") {
@@ -71,7 +94,7 @@ import { AstroFont } from "astro-font";
         googleSignInButton.addEventListener("click", async () => {
           try {
             const result = await signInWithPopup(auth, provider);
-            window.location.href = "/home";
+            await checkProfileAndRedirect(result.user);
           } catch (error: any) {
             console.error("Error signing in with Google:", error);
             if (error.code === "auth/account-exists-with-different-credential") {

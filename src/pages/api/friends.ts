@@ -4,19 +4,25 @@ import { initializeApp, cert, getApps } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 
 if (!getApps().length) {
-  const serviceAccount = {
-    project_id:
-      import.meta.env.FIREBASE_PROJECT_ID ||
-      process.env.FIREBASE_PROJECT_ID ||
-      process.env.PUBLIC_FIREBASE_PROJECT_ID ||
-      import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
-    client_email: import.meta.env.FIREBASE_CLIENT_EMAIL || process.env.FIREBASE_CLIENT_EMAIL,
-    private_key: ((import.meta.env.FIREBASE_PRIVATE_KEY || process.env.FIREBASE_PRIVATE_KEY || "") as string).replace(/\\n/g, "\n"),
-  } as const;
+  const privateKey = (import.meta.env.FIREBASE_PRIVATE_KEY || process.env.FIREBASE_PRIVATE_KEY) as string | undefined;
 
-  initializeApp({
-    credential: cert(serviceAccount as any),
-  });
+  if (privateKey && privateKey.trim() !== "") {
+    const serviceAccount = {
+      project_id:
+        import.meta.env.FIREBASE_PROJECT_ID ||
+        process.env.FIREBASE_PROJECT_ID ||
+        process.env.PUBLIC_FIREBASE_PROJECT_ID ||
+        import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
+      client_email: import.meta.env.FIREBASE_CLIENT_EMAIL || process.env.FIREBASE_CLIENT_EMAIL,
+      private_key: privateKey.replace(/\\n/g, "\n"),
+    } as const;
+
+    initializeApp({
+      credential: cert(serviceAccount as any),
+    });
+  } else {
+    initializeApp();
+  }
 }
 
 const prisma = new PrismaClient();
@@ -110,6 +116,29 @@ export async function GET({ request }: { request: Request }) {
         status: 200,
         headers: { "Content-Type": "application/json" },
       });
+    }
+
+    if (action === "check-profile-completion") {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          username: true,
+          name: true,
+          displayName: true,
+        },
+      });
+      const isComplete = !!(user?.username && user?.username.trim() !== "");
+      return new Response(
+        JSON.stringify({
+          isComplete,
+          hasUsername: !!user?.username,
+          hasName: !!user?.name || !!user?.displayName,
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
 
     if (action === "user-profile") {
@@ -262,6 +291,7 @@ export async function GET({ request }: { request: Request }) {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
+    console.error("GET /api/friends error:", error);
     return new Response(JSON.stringify({ error: "Request failed" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
@@ -436,6 +466,7 @@ export async function POST({ request }: { request: Request }) {
       }
     );
   } catch (error) {
+    console.error("POST /api/friends error:", error);
     return new Response(JSON.stringify({ error: "Failed to add friend" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
@@ -481,6 +512,7 @@ export async function DELETE({ request }: { request: Request }) {
       }
     );
   } catch (error) {
+    console.error("DELETE /api/friends error:", error);
     return new Response(JSON.stringify({ error: "Failed to remove friend" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

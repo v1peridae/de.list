@@ -68,7 +68,7 @@ import { AstroFont } from "astro-font";
           try {
             const userCredential = await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
             console.log("User created:", userCredential.user);
-            window.location.href = "/home";
+            window.location.href = "/onboarding";
           } catch (error: any) {
             console.error("Error creating user:", error);
             if (error.code === "auth/email-already-in-use") {
@@ -87,7 +87,7 @@ import { AstroFont } from "astro-font";
           try {
             const result = await signInWithPopup(auth, provider);
             console.log("User signed up with Google:", result.user);
-            window.location.href = "/home";
+            window.location.href = "/onboarding";
           } catch (error: any) {
             console.error("Error signing up with Google:", error);
             if (error.code === "auth/account-exists-with-different-credential") {

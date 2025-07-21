@@ -97,7 +97,7 @@ import Header from "../components/Header.astro";
   </body>
 
   <script>
-    import { initAuthGuard, addLogoutFunctionality } from "../utils/authGuard";
+    import { initProtectedPageAuthGuard, addLogoutFunctionality } from "../utils/authGuard";
 
     let timeoutId: NodeJS.Timeout;
     const searchInput = document.getElementById("searchInput") as HTMLInputElement;
@@ -401,7 +401,7 @@ import Header from "../components/Header.astro";
       }
     }
 
-    initAuthGuard().then((user) => {
+    initProtectedPageAuthGuard().then((user) => {
       if (user) {
         console.log("User authenticated:", user.email);
         addLogoutFunctionality();

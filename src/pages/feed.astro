@@ -113,7 +113,7 @@ import Header from "../components/Header.astro";
   </body>
 
   <script>
-    import { initAuthGuard, addLogoutFunctionality } from "../utils/authGuard";
+    import { initProtectedPageAuthGuard, addLogoutFunctionality } from "../utils/authGuard";
     import { auth } from "../firebase/config";
 
     const feedContainer = document.getElementById("feedContainer") as HTMLElement;
@@ -295,7 +295,7 @@ import Header from "../components/Header.astro";
       bookDetailModal.classList.remove("hidden");
     }
 
-    initAuthGuard().then((user) => {
+    initProtectedPageAuthGuard().then((user) => {
       if (user) {
         console.log("User authenticated:", user.email);
         addLogoutFunctionality();

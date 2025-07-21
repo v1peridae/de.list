@@ -155,7 +155,7 @@ import Header from "../components/Header.astro";
     </div>
 
     <script>
-      import { initAuthGuard } from "../utils/authGuard";
+      import { initProtectedPageAuthGuard } from "../utils/authGuard";
       import type { User } from "firebase/auth";
 
       let currentUser: User | null = null;
@@ -166,7 +166,7 @@ import Header from "../components/Header.astro";
 
       async function init() {
         try {
-          currentUser = await initAuthGuard();
+          currentUser = await initProtectedPageAuthGuard();
           if (currentUser) {
             await loadUserProfile();
             await loadUserBooks();

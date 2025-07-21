@@ -1,0 +1,280 @@
+---
+import "../styles/global.css";
+import Header from "../components/Header.astro";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>de.list</title>
+    <style>
+      .profile-preview {
+        border: none;
+        position: relative;
+      }
+
+      .profile-preview::before {
+        content: "";
+        position: absolute;
+        top: -6px;
+        left: -6px;
+        right: -6px;
+        bottom: -6px;
+        border-radius: 50%;
+        background: url("data:image/svg+xml,%3csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='50' cy='50' r='46' fill='none' stroke='%23687fe5' stroke-width='3' stroke-dasharray='10 6' stroke-linecap='round' /%3e%3c/svg%3e")
+          center/contain no-repeat;
+        z-index: -1;
+      }
+
+      .profile-preview img,
+      .profile-preview span {
+        position: relative;
+        z-index: 1;
+      }
+    </style>
+  </head>
+  <body class="flex flex-col items-center min-h-screen bg-[#feebf6]">
+    <Header />
+
+    <div class="flex flex-col items-center mt-8 w-full max-w-lg px-4">
+      <h1 class="text-4xl titles text-[#687fe5] mb-2 text-center">complete your profile</h1>
+
+      <form id="onboardingForm" class="w-full space-y-6">
+        <!-- Profile Picture -->
+        <div class="flex flex-col items-center">
+          <div id="profilePicPreview" class="profile-preview w-24 h-24 rounded-full flex items-center justify-center mb-4 cursor-pointer">
+            <img id="previewImage" class="w-full h-full rounded-full object-cover hidden" alt="Profile Preview" />
+            <span id="previewInitial" class="text-2xl titles text-[#687fe5]">?</span>
+          </div>
+
+          <input type="file" id="profilePicInput" accept="image/*" class="hidden" />
+        </div>
+
+        <!-- Name and Username Side by Side -->
+        <div class="flex gap-4">
+          <!-- Name -->
+          <div class="flex-1">
+            <label for="nameInput" class="block subtitle text-lg mb-2 text-[#687fe5]">your name</label>
+            <input
+              type="text"
+              id="nameInput"
+              placeholder="enter your name"
+              class="w-full bg-transparent border-b-2 border-[#687fe5] outline-none navbar text-lg pb-2"
+              maxlength="50"
+              required
+            />
+          </div>
+
+          <!-- Username -->
+          <div class="flex-1">
+            <label for="usernameInput" class="block subtitle text-lg mb-2 text-[#687fe5]">username</label>
+            <div class="relative">
+              <span class="absolute left-0 top-0 subtitle text-lg text-[#687fe5]">@</span>
+              <input
+                type="text"
+                id="usernameInput"
+                placeholder="username"
+                class="w-full bg-transparent border-b-2 border-[#687fe5] outline-none subtitle text-lg pb-2 pl-6"
+                maxlength="30"
+                pattern="[a-zA-Z0-9_]+"
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Bio -->
+        <div>
+          <label for="bioInput" class="block subtitle text-lg mb-2 text-[#687fe5]">bio</label>
+          <textarea
+            id="bioInput"
+            placeholder="tell us something about yourself..."
+            rows="3"
+            class="w-full bg-transparent border-2 border-[#687fe5] outline-none subtitle text-lg p-3 resize-none"
+            maxlength="200"></textarea>
+          <div class="flex justify-between mt-1">
+            <span class="subtitle text-sm text-[#687fe5] opacity-60">optional</span>
+            <span id="bioCount" class="subtitle text-sm text-[#687fe5] opacity-60">0/200</span>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          id="submitBtn"
+          class="w-full py-3 border-2 border-[#687fe5] text-[#687fe5] button text-xl hover:bg-[#687fe5] hover:text-[#feebf6] mt-8"
+        >
+          complete profile
+        </button>
+      </form>
+    </div>
+
+    <div id="loadingModal" class="fixed inset-0 flex items-center justify-center hidden z-50 bg-black bg-opacity-50">
+      <div class="bg-[#feebf6] text-[#687fe5] p-8 max-w-sm w-full mx-4 border-2 border-[#687fe5] text-center">
+        <h3 class="text-2xl titles mb-4">setting up your profile...</h3>
+      </div>
+    </div>
+
+    <script>
+      import { initOnboardingAuthGuard } from "../utils/authGuard";
+      import type { User } from "firebase/auth";
+
+      let currentUser: User | null = null;
+      let profilePicData: string | null = null;
+
+      async function init() {
+        try {
+          currentUser = await initOnboardingAuthGuard();
+          if (currentUser) {
+            const nameInput = document.getElementById("nameInput") as HTMLInputElement;
+            if (nameInput && currentUser.displayName) {
+              nameInput.value = currentUser.displayName;
+              updatePreviewInitial();
+            }
+          }
+        } catch (error) {
+          window.location.href = "/login";
+        }
+      }
+
+      function updatePreviewInitial() {
+        const nameInput = document.getElementById("nameInput") as HTMLInputElement;
+        const previewInitial = document.getElementById("previewInitial");
+        if (nameInput?.value && previewInitial && !profilePicData) {
+          previewInitial.textContent = nameInput.value.charAt(0).toUpperCase();
+        }
+      }
+      //I AM GOING TO END MY SHIT KDHSJIODSFKJHBKDWKBDSHMJHDSUMJHKSFKMBS I HATE CODING THIS. BRO CAN MY CODE NOT WORK </333333
+      function validateForm(): boolean {
+        const nameInput = document.getElementById("nameInput") as HTMLInputElement;
+        if (!nameInput?.value.trim()) {
+          return false;
+        }
+
+        const usernameInput = document.getElementById("usernameInput") as HTMLInputElement;
+        const value = usernameInput?.value.trim();
+
+        if (!value || !/^[a-zA-Z0-9_]+$/.test(value)) {
+          return false;
+        }
+
+        return true;
+      }
+
+      async function checkUsernameAvailability() {
+        const usernameInput = document.getElementById("usernameInput") as HTMLInputElement;
+        const value = usernameInput?.value.trim();
+
+        if (!currentUser || !value || !/^[a-zA-Z0-9_]+$/.test(value)) {
+          return;
+        }
+
+        try {
+          const token = await currentUser.getIdToken();
+          const response = await fetch("/api/friends?action=update-profile", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username: value }),
+          });
+        } catch (error) {
+          console.error("Error checking username:", error);
+        }
+      }
+
+      async function completeOnboarding(e: Event) {
+        e.preventDefault();
+
+        if (!validateForm() || !currentUser) return;
+
+        const loadingModal = document.getElementById("loadingModal");
+        loadingModal?.classList.remove("hidden");
+
+        const nameInput = document.getElementById("nameInput") as HTMLInputElement;
+        const usernameInput = document.getElementById("usernameInput") as HTMLInputElement;
+        const bioInput = document.getElementById("bioInput") as HTMLTextAreaElement;
+
+        const profileData = {
+          name: nameInput?.value.trim(),
+          displayName: nameInput?.value.trim(),
+          username: usernameInput?.value.trim(),
+          bio: bioInput?.value.trim() || null,
+          profilePic: profilePicData,
+        };
+
+        try {
+          const token = await currentUser.getIdToken();
+          const response = await fetch("/api/friends?action=update-profile", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(profileData),
+          });
+
+          if (response.ok) {
+            window.location.href = "/home";
+          } else {
+            throw new Error("Failed to save profile");
+          }
+        } catch (error) {
+          console.error("Error saving profile:", error);
+          alert("Failed to save profile. Please try again.");
+        } finally {
+          loadingModal?.classList.add("hidden");
+        }
+      }
+
+      document.getElementById("profilePicPreview")?.addEventListener("click", () => {
+        document.getElementById("profilePicInput")?.click();
+      });
+
+      document.getElementById("profilePicInput")?.addEventListener("change", (e) => {
+        const input = e.target as HTMLInputElement;
+        const file = input.files?.[0];
+
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            profilePicData = e.target?.result as string;
+            const previewImage = document.getElementById("previewImage") as HTMLImageElement;
+            const previewInitial = document.getElementById("previewInitial");
+
+            if (previewImage && previewInitial) {
+              previewImage.src = profilePicData;
+              previewImage.classList.remove("hidden");
+              previewInitial.style.display = "none";
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      document.getElementById("nameInput")?.addEventListener("input", updatePreviewInitial);
+
+      let usernameTimeout: ReturnType<typeof setTimeout>;
+      document.getElementById("usernameInput")?.addEventListener("input", () => {
+        clearTimeout(usernameTimeout);
+        usernameTimeout = setTimeout(checkUsernameAvailability, 500);
+      });
+
+      document.getElementById("bioInput")?.addEventListener("input", () => {
+        const bioInput = document.getElementById("bioInput") as HTMLTextAreaElement;
+        const bioCount = document.getElementById("bioCount");
+        if (bioInput && bioCount) {
+          bioCount.textContent = `${bioInput.value.length}/200`;
+        }
+      });
+
+      document.getElementById("onboardingForm")?.addEventListener("submit", completeOnboarding);
+
+      init();
+    </script>
+  </body>
+</html>

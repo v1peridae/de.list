@@ -76,10 +76,11 @@ import Header from "../components/Header.astro";
     </div>
 
     <script>
-      import { initAuthGuard, addLogoutFunctionality } from "../utils/authGuard";
+      import { initProtectedPageAuthGuard, addLogoutFunctionality } from "../utils/authGuard";
       import { auth } from "../firebase/config";
+      import type { User } from "firebase/auth";
 
-      initAuthGuard().then((user) => {
+      initProtectedPageAuthGuard().then((user: User | null) => {
         if (user) {
           addLogoutFunctionality();
           loadUserFriendCode();
