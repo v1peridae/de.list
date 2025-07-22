@@ -9,7 +9,7 @@ import Header from "../components/Header.astro";
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
-    <title>Profile - de.list</title>
+    <title>de.list</title>
     <style>
       .profile-circle {
         border: none;
@@ -55,10 +55,7 @@ import Header from "../components/Header.astro";
           </div>
         </div>
 
-        <button
-          id="editProfileBtn"
-          class="px-6 py-2 border-2 border-[#687fe5] text-[#687fe5] button text-xl hover:bg-[#687fe5] hover:text-[#feebf6] transition-colors flex-shrink-0"
-        >
+        <button id="editProfileBtn" class="px-6 py-2 border-2 border-[#687fe5] text-[#687fe5] button text-xl flex-shrink-0">
           edit profile
         </button>
       </div>
@@ -75,14 +72,14 @@ import Header from "../components/Header.astro";
             </button>
             <button
               id="tabAlready"
-              class="tab-button text-2xl subtitle text-[#687fe5] pb-2 border-b-2 border-transparent hover:border-[#687fe5] opacity-60"
+              class="tab-button text-2xl subtitle text-[#687fe5] pb-2 border-b-2 border-transparent opacity-60"
               data-tab="already"
             >
               already read
             </button>
             <button
               id="tabWant"
-              class="tab-button text-2xl subtitle text-[#687fe5] pb-2 border-b-2 border-transparent hover:border-[#687fe5] opacity-60"
+              class="tab-button text-2xl subtitle text-[#687fe5] pb-2 border-b-2 border-transparent opacity-60"
               data-tab="want"
             >
               want to read
@@ -96,7 +93,50 @@ import Header from "../components/Header.astro";
       </div>
     </div>
 
-    <div id="editModal" class="fixed inset-0 flex items-center justify-center hidden z-50 bg-black bg-opacity-50">
+    <div id="finishBookModal" class="fixed inset-0 flex items-center justify-center hidden z-50">
+      <div class="bg-[#feebf6] text-[#687fe5] p-8 max-w-2xl w-full mx-4 border-2 border-[#687fe5]">
+        <div class="flex justify-between items-start mb-6">
+          <h3 class="titles text-2xl">Mark as Finished</h3>
+          <button id="closeFinishModal" class="navbar text-3xl"> <span class="text-xl">(close)</span></button>
+        </div>
+
+        <form id="finishBookForm" class="space-y-4">
+          <div>
+            <h4 id="finishBookTitle" class="titles text-lg mb-2">Book Title</h4>
+            <p id="finishBookAuthor" class="subtitle text-sm opacity-75 mb-4">Author</p>
+          </div>
+
+          <div>
+            <label for="finishDate" class="block subtitle text-sm mb-1">Finished reading:</label>
+            <input type="date" id="finishDate" class="w-full bg-transparent border-b border-[#687fe5] subtitle text-sm outline-none pb-1" />
+          </div>
+
+          <div>
+            <label for="finishNotes" class="block subtitle text-lg mb-2">My notes about it:</label>
+            <textarea
+              id="finishNotes"
+              class="w-full h-32 bg-transparent border-2 border-[#687fe5] p-4 subtitle resize-none outline-none"
+              placeholder="What do you think about this book?"></textarea>
+          </div>
+
+          <div>
+            <label for="favouriteSections" class="block subtitle text-lg mb-2">Favourite sections:</label>
+            <textarea
+              id="favouriteSections"
+              class="w-full h-32 bg-transparent border-2 border-[#687fe5] p-4 subtitle resize-none outline-none"
+              placeholder="..."></textarea>
+          </div>
+
+          <div class="flex justify-end gap-4 mt-6">
+            <button type="button" id="cancelFinish" class="border-2 border-[#687fe5] text-[#687fe5] px-6 py-2 navbar text-lg">cancel</button
+            >
+            <button type="submit" class="bg-[#687fe5] text-[#feebf6] px-6 py-2 navbar text-lg">mark as finished &lt;3</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="editModal" class="fixed inset-0 flex items-center justify-center hidden z-50 bg-[#feebf6] bg-opacity-50">
       <div class="bg-[#feebf6] text-[#687fe5] p-8 max-w-md w-full mx-4 border-2 border-[#687fe5]">
         <div class="flex justify-between items-center mb-6">
           <h3 class="text-2xl titles">Edit Profile</h3>
@@ -142,13 +182,8 @@ import Header from "../components/Header.astro";
           </div>
 
           <div class="flex gap-4 pt-4">
-            <button
-              type="submit"
-              class="flex-1 button text-lg py-2 border-2 border-[#687fe5] hover:bg-[#687fe5] hover:text-[#feebf6] transition-colors"
-            >
-              Save Changes
-            </button>
-            <button type="button" id="cancelEdit" class="flex-1 button text-lg py-2 text-[#687fe5] hover:underline"> Cancel </button>
+            <button type="submit" class="flex-1 button text-lg py-2 border-2 border-[#687fe5]"> Save Changes </button>
+            <button type="button" id="cancelEdit" class="flex-1 button text-lg py-2 text-[#687fe5]"> Cancel </button>
           </div>
         </form>
       </div>
@@ -163,11 +198,23 @@ import Header from "../components/Header.astro";
       let alreadyReadBooks: any[] = [];
       let wantToReadBooks: any[] = [];
       let activeTab = "currently";
+      let targetUserId: string | null = null;
+      let isOwnProfile = true;
 
       async function init() {
         try {
           currentUser = await initProtectedPageAuthGuard();
           if (currentUser) {
+            const params = new URLSearchParams(window.location.search);
+            const requestedId = params.get("userId");
+            targetUserId = requestedId || currentUser.uid;
+            isOwnProfile = targetUserId === currentUser.uid;
+            if (!isOwnProfile) {
+              const editBtn = document.getElementById("editProfileBtn");
+              if (editBtn) {
+                (editBtn as HTMLElement).style.display = "none";
+              }
+            }
             await loadUserProfile();
             await loadUserBooks();
           }
@@ -181,7 +228,8 @@ import Header from "../components/Header.astro";
 
         try {
           const token = await currentUser.getIdToken();
-          const response = await fetch("/api/friends?action=my-profile", {
+          const endpoint = isOwnProfile ? "/api/friends?action=my-profile" : `/api/friends?action=user-profile&userId=${targetUserId}`;
+          const response = await fetch(endpoint, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -238,7 +286,7 @@ import Header from "../components/Header.astro";
 
         try {
           const token = await currentUser.getIdToken();
-          const response = await fetch(`/api/friends?action=user-profile&userId=${currentUser.uid}`, {
+          const response = await fetch(`/api/friends?action=user-profile&userId=${targetUserId}`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -251,13 +299,69 @@ import Header from "../components/Header.astro";
           alreadyReadBooks = books.filter((book: any) => book.finished);
           wantToReadBooks = books.filter((book: any) => !book.started && !book.finished);
 
-          displayBooksForActiveTab();
+          await displayBooksForActiveTab();
         } catch (error) {
           console.error("Error loading books:", error);
         }
       }
 
-      function populateBookSection(sectionId: string, books: any[]) {
+      function getBookCoverUrl(title: string, author?: string): string {
+        const query = author ? `${title} ${author}` : title;
+        const encodedQuery = encodeURIComponent(query);
+
+        return `https://covers.openlibrary.org/b/isbn/9780385533225-M.jpg?default=false`;
+      }
+
+      async function fetchBookCover(title: string, author?: string): Promise<string | null> {
+        try {
+          const query = author ? `${title} ${author}` : title;
+          const encodedQuery = encodeURIComponent(query);
+
+          const searchResponse = await fetch(`https://openlibrary.org/search.json?title=${encodedQuery}&limit=1`);
+          const searchData = await searchResponse.json();
+
+          if (searchData.docs && searchData.docs.length > 0) {
+            const book = searchData.docs[0];
+
+            if (book.isbn && book.isbn.length > 0) {
+              const isbn = book.isbn[0];
+              return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
+            }
+          }
+
+          return null;
+        } catch (error) {
+          console.error("Error fetching book cover:", error);
+          return null;
+        }
+      }
+
+      function getActionButtons(book: any, currentTab: string) {
+        if (!isOwnProfile) return "";
+
+        const buttons = [];
+
+        if (currentTab === "want") {
+          buttons.push(
+            `<button class="move-book subtitle text-xs text-[#687fe5] opacity-50" data-book-id="${book.id}" data-action="start-reading">(start reading)</button>`
+          );
+        } else if (currentTab === "currently") {
+          buttons.push(
+            `<button class="finish-book-btn subtitle text-xs text-[#687fe5] opacity-50" data-book-id="${book.id}" data-book-title="${book.title}" data-book-author="${book.author || ""}">(mark as finished)</button>`
+          );
+          buttons.push(
+            `<button class="move-book subtitle text-xs text-[#687fe5] opacity-50" data-book-id="${book.id}" data-action="stop-reading">(stop reading)</button>`
+          );
+        } else if (currentTab === "already") {
+          buttons.push(
+            `<button class="move-book subtitle text-xs text-[#687fe5] opacity-50" data-book-id="${book.id}" data-action="start-reading">(read again)</button>`
+          );
+        }
+
+        return buttons.join("");
+      }
+
+      async function populateBookSection(sectionId: string, books: any[]) {
         const section = document.getElementById(sectionId);
         if (!section) return;
 
@@ -269,17 +373,97 @@ import Header from "../components/Header.astro";
         section.innerHTML = books
           .map(
             (book: any) => `
-          <div class="book-item p-3 border border-[#687fe5] text-left">
-            <h5 class="titles text-lg font-bold">${book.title}</h5>
-            ${book.author ? `<p class="subtitle text-sm opacity-80">${book.author}</p>` : ""}
-            ${book.notes ? `<p class="subtitle text-sm mt-1">${book.notes}</p>` : ""}
+          <div class="book-item bg-[#feebf6] border-2 border-[#687fe5] p-4" data-book-id="${book.id}">
+            <div class="flex gap-4">
+              <div class="flex-shrink-0">
+                <div class="w-16 h-24 bg-[#687fe5] flex items-center justify-center text-[#feebf6] text-xs text-center book-cover-container" data-book-title="${book.title}" data-book-author="${book.author || ""}">
+                  <div class="loading-text">Loading...</div>
+                  <img class="book-cover-img w-full h-full object-cover hidden" alt="${book.title}" />
+                </div>
+              </div>
+              <div class="flex-1">
+                <div class="flex justify-between items-start">
+                  <div class="flex-1">
+                    <h5 class="titles text-lg text-[#687fe5] mb-1">${book.title}</h5>
+                    ${book.author ? `<p class="subtitle text-sm text-[#687fe5] opacity-75 mb-2">${book.author}</p>` : ""}
+                    <div class="flex gap-3 mb-2">
+                      ${getActionButtons(book, activeTab)}
+                    </div>
+                    ${book.notes ? `<p class="subtitle text-sm text-[#687fe5] opacity-60">${book.notes}</p>` : ""}
+                  </div>
+                  ${isOwnProfile ? `<button class="remove-book subtitle text-xs text-[#687fe5] opacity-50 ml-2" data-book-id="${book.id}">(remove)</button>` : ""}
+                </div>
+              </div>
+            </div>
           </div>
         `
           )
           .join("");
+
+        const coverContainers = section.querySelectorAll(".book-cover-container");
+        coverContainers.forEach(async (container) => {
+          const bookTitle = (container as HTMLElement).dataset.bookTitle;
+          const bookAuthor = (container as HTMLElement).dataset.bookAuthor;
+          const img = container.querySelector(".book-cover-img") as HTMLImageElement;
+          const loadingText = container.querySelector(".loading-text") as HTMLElement;
+
+          if (bookTitle) {
+            try {
+              const coverUrl = await fetchBookCover(bookTitle, bookAuthor);
+              if (coverUrl) {
+                img.src = coverUrl;
+                img.onload = () => {
+                  loadingText.style.display = "none";
+                  img.classList.remove("hidden");
+                };
+                img.onerror = () => {
+                  loadingText.innerHTML = "BOOK<br/>COVER";
+                };
+              } else {
+                loadingText.innerHTML = "BOOK<br/>COVER";
+              }
+            } catch (error) {
+              loadingText.innerHTML = "BOOK<br/>COVER";
+            }
+          }
+        });
+        if (isOwnProfile) {
+          section.querySelectorAll(".remove-book").forEach((button) => {
+            button.addEventListener("click", async (e) => {
+              e.stopPropagation();
+              const bookId = (e.target as HTMLElement).dataset.bookId;
+              if (bookId) {
+                await removeBook(bookId);
+              }
+            });
+          });
+
+          section.querySelectorAll(".move-book").forEach((button) => {
+            button.addEventListener("click", async (e) => {
+              e.stopPropagation();
+              const bookId = (e.target as HTMLElement).dataset.bookId;
+              const action = (e.target as HTMLElement).dataset.action;
+              if (bookId && action) {
+                await moveBook(bookId, action);
+              }
+            });
+          });
+
+          section.querySelectorAll(".finish-book-btn").forEach((button) => {
+            button.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const bookId = (e.target as HTMLElement).dataset.bookId;
+              const bookTitle = (e.target as HTMLElement).dataset.bookTitle;
+              const bookAuthor = (e.target as HTMLElement).dataset.bookAuthor;
+              if (bookId && bookTitle) {
+                openFinishBookModal(bookId, bookTitle, bookAuthor);
+              }
+            });
+          });
+        }
       }
 
-      function displayBooksForActiveTab() {
+      async function displayBooksForActiveTab() {
         let booksToShow: any[] = [];
 
         switch (activeTab) {
@@ -294,10 +478,136 @@ import Header from "../components/Header.astro";
             break;
         }
 
-        populateBookSection("bookContent", booksToShow);
+        await populateBookSection("bookContent", booksToShow);
       }
 
-      function switchTab(tabName: string) {
+      async function removeBook(bookId: string) {
+        if (!currentUser) return;
+
+        try {
+          const token = await currentUser.getIdToken();
+          const response = await fetch("/api/books", {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ bookId }),
+          });
+
+          if (response.ok) {
+            await loadUserBooks();
+          } else {
+            console.error("Failed to remove book");
+          }
+        } catch (error) {
+          console.error("Error removing book:", error);
+        }
+      }
+
+      let currentFinishingBookId: string | null = null;
+
+      function openFinishBookModal(bookId: string, title: string, author: string | undefined) {
+        currentFinishingBookId = bookId;
+
+        const modal = document.getElementById("finishBookModal");
+        const titleEl = document.getElementById("finishBookTitle");
+        const authorEl = document.getElementById("finishBookAuthor");
+        const dateInput = document.getElementById("finishDate") as HTMLInputElement;
+
+        if (titleEl) titleEl.textContent = title;
+        if (authorEl) authorEl.textContent = author || "Unknown Author";
+        if (dateInput) dateInput.value = new Date().toISOString().split("T")[0];
+
+        if (modal) modal.classList.remove("hidden");
+      }
+
+      function closeFinishBookModal() {
+        const modal = document.getElementById("finishBookModal");
+        if (modal) modal.classList.add("hidden");
+
+        (document.getElementById("finishNotes") as HTMLTextAreaElement).value = "";
+        (document.getElementById("favouriteSections") as HTMLTextAreaElement).value = "";
+        currentFinishingBookId = null;
+      }
+
+      async function finishBook(bookId: string, finishDate: string, notes: string, favourite: string) {
+        if (!currentUser) return;
+
+        try {
+          const token = await currentUser.getIdToken();
+          const response = await fetch("/api/books", {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              bookId,
+              finished: finishDate,
+              notes: notes || undefined,
+              favourite: favourite || undefined,
+            }),
+          });
+
+          if (response.ok) {
+            closeFinishBookModal();
+            await loadUserBooks();
+          } else {
+            console.error("Failed to finish book");
+          }
+        } catch (error) {
+          console.error("Error finishing book:", error);
+        }
+      }
+
+      async function moveBook(bookId: string, action: string) {
+        if (!currentUser) return;
+
+        try {
+          const token = await currentUser.getIdToken();
+          let updateData: any = {};
+
+          switch (action) {
+            case "start-reading":
+              updateData = {
+                started: new Date().toISOString().split("T")[0],
+                finished: null,
+              };
+              break;
+            case "finish-reading":
+              updateData = {
+                finished: new Date().toISOString().split("T")[0],
+              };
+              break;
+            case "stop-reading":
+              updateData = {
+                started: null,
+                finished: null,
+              };
+              break;
+          }
+
+          const response = await fetch("/api/books", {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ bookId, ...updateData }),
+          });
+
+          if (response.ok) {
+            await loadUserBooks();
+          } else {
+            console.error("Failed to move book");
+          }
+        } catch (error) {
+          console.error("Error moving book:", error);
+        }
+      }
+
+      async function switchTab(tabName: string) {
         activeTab = tabName;
 
         const tabButtons = document.querySelectorAll(".tab-button");
@@ -314,16 +624,16 @@ import Header from "../components/Header.astro";
           }
         });
 
-        displayBooksForActiveTab();
+        await displayBooksForActiveTab();
       }
 
       const tabButtons = document.querySelectorAll(".tab-button");
       tabButtons.forEach((button) => {
-        button.addEventListener("click", (e) => {
+        button.addEventListener("click", async (e) => {
           const target = e.target as HTMLElement;
           const tabName = target.dataset.tab;
           if (tabName) {
-            switchTab(tabName);
+            await switchTab(tabName);
           }
         });
       });
@@ -409,6 +719,33 @@ import Header from "../components/Header.astro";
           } catch (error) {
             console.error("Error signing out:", error);
           }
+        });
+      }
+
+      const finishBookModal = document.getElementById("finishBookModal");
+      const closeFinishModal = document.getElementById("closeFinishModal");
+      const cancelFinish = document.getElementById("cancelFinish");
+      const finishBookForm = document.getElementById("finishBookForm");
+
+      if (closeFinishModal) {
+        closeFinishModal.addEventListener("click", closeFinishBookModal);
+      }
+
+      if (cancelFinish) {
+        cancelFinish.addEventListener("click", closeFinishBookModal);
+      }
+
+      if (finishBookForm) {
+        finishBookForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          if (!currentFinishingBookId) return;
+
+          const finishDate = (document.getElementById("finishDate") as HTMLInputElement).value;
+          const notes = (document.getElementById("finishNotes") as HTMLTextAreaElement).value;
+          const favourite = (document.getElementById("favouriteSections") as HTMLTextAreaElement).value;
+
+          await finishBook(currentFinishingBookId, finishDate, notes, favourite);
         });
       }
 

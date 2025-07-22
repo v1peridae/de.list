@@ -80,3 +80,107 @@ export async function GET({ request }: { request: Request }) {
     });
   }
 }
+
+export async function PUT({ request }: { request: Request }) {
+  try {
+    const { userId } = await authenticateUser(request);
+    const body = await request.json();
+
+    const { bookId, title, author, started, finished, notes, favourite } = body;
+
+    if (!bookId) {
+      return new Response(JSON.stringify({ error: "Book ID is required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const existingBook = await prisma.book.findFirst({
+      where: { id: parseInt(bookId), userId },
+    });
+
+    if (!existingBook) {
+      return new Response(JSON.stringify({ error: "Book not found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const updateData: any = {};
+    if (title !== undefined) updateData.title = title;
+    if (author !== undefined) updateData.author = author;
+    if (started !== undefined) updateData.started = started ? new Date(started) : null;
+    if (finished !== undefined) updateData.finished = finished ? new Date(finished) : null;
+    if (notes !== undefined) updateData.notes = notes;
+    if (favourite !== undefined) updateData.favourite = favourite;
+
+    const updatedBook = await prisma.book.update({
+      where: { id: parseInt(bookId) },
+      data: updateData,
+    });
+
+    return new Response(
+      JSON.stringify({
+        message: "Book updated successfully",
+        book: updatedBook,
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  } catch (error) {
+    console.error("Error updating book:", error);
+    return new Response(JSON.stringify({ error: "Failed to update book" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+}
+
+export async function DELETE({ request }: { request: Request }) {
+  try {
+    const { userId } = await authenticateUser(request);
+    const body = await request.json();
+
+    const { bookId } = body;
+
+    if (!bookId) {
+      return new Response(JSON.stringify({ error: "Book ID is required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const existingBook = await prisma.book.findFirst({
+      where: { id: parseInt(bookId), userId },
+    });
+
+    if (!existingBook) {
+      return new Response(JSON.stringify({ error: "Book not found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    await prisma.book.delete({
+      where: { id: parseInt(bookId) },
+    });
+
+    return new Response(
+      JSON.stringify({
+        message: "Book deleted successfully",
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  } catch (error) {
+    console.error("Error deleting book:", error);
+    return new Response(JSON.stringify({ error: "Failed to delete book" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+}
