@@ -301,7 +301,7 @@ export async function GET({ request }: { request: Request }) {
 
 export async function POST({ request }: { request: Request }) {
   try {
-    const { userId } = await authenticateUser(request);
+    const { userId, decodedToken } = await authenticateUser(request);
     const body = await request.json();
 
     const url = new URL(request.url);
@@ -324,11 +324,33 @@ export async function POST({ request }: { request: Request }) {
         }
       }
 
-      const updatedUser = await prisma.user.update({
+      let friendCode;
+      let isUnique = false;
+      while (!isUnique) {
+        friendCode = generateFriendCode();
+        const existingUser = await prisma.user.findUnique({
+          where: { friendCode },
+        });
+        if (!existingUser) {
+          isUnique = true;
+        }
+      }
+
+      const updatedUser = await prisma.user.upsert({
         where: { id: userId },
-        data: {
+        update: {
           name: name || undefined,
           displayName: displayName || undefined,
+          username: username || undefined,
+          bio: bio || undefined,
+          profilePic: profilePic || undefined,
+        },
+        create: {
+          id: userId,
+          email: decodedToken.email || "",
+          friendCode: friendCode!,
+          name: name || decodedToken.name || undefined,
+          displayName: displayName || decodedToken.name || decodedToken.email?.split("@")[0] || undefined,
           username: username || undefined,
           bio: bio || undefined,
           profilePic: profilePic || undefined,

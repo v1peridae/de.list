@@ -76,13 +76,7 @@ import Header from "../components/Header.astro";
               <div class="flex items-center gap-4">
                 <span class="subtitle">add media!</span>
                 <input type="file" id="mediaUpload" accept="image/*,video/*,audio/*" multiple class="hidden" />
-                <button
-                  type="button"
-                  id="attachFilesBtn"
-                  class="border-2 border-[#687fe5] px-4 py-2 navbar text-xl hover:bg-[#687fe5] hover:text-[#feebf6] transition-colors"
-                >
-                  attach files
-                </button>
+                <button type="button" id="attachFilesBtn" class="border-2 border-[#687fe5] px-4 py-2 navbar text-xl"> attach files </button>
               </div>
               <div id="mediaPreview" class="mt-4 grid grid-cols-4 gap-4"></div>
             </div>
@@ -183,7 +177,7 @@ import Header from "../components/Header.astro";
 
         const removeBtn = document.createElement("button");
         removeBtn.innerHTML = "&times;";
-        removeBtn.className = "absolute top-1 right-1 text-[#687fe5] hover:text-[#feebf6] text-xl";
+        removeBtn.className = "absolute top-1 right-1 text-[#687fe5] text-xl";
         removeBtn.onclick = () => {
           uploadedFiles.splice(index, 1);
           updateMediaPreview();
@@ -351,14 +345,14 @@ import Header from "../components/Header.astro";
                   alt="${book.title}" 
                   class="w-32 h-48 object-cover"
                 />
-                <div class="absolute inset-0 bg-black bg-opacity-75 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-center items-center gap-2 px-2">
-                  <button class="reading-status-btn w-full py-1 px-2 bg-[#687fe5] text-[#feebf6] text-sm subtitle hover:bg-[#feebf6] hover:text-[#687fe5] transition-colors border border-[#687fe5]" data-status="finished" data-book='${JSON.stringify(book)}'>
+                <div class="absolute inset-0 bg-[#feebf6] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center gap-2 px-2">
+                  <button class="reading-status-btn w-full py-1 px-2 bg-[#687fe5] text-[#feebf6] text-sm subtitle border border-[#687fe5]" data-status="finished" data-book='${JSON.stringify(book)}'>
                     read
                   </button>
-                  <button class="reading-status-btn w-full py-1 px-2 bg-transparent text-[#feebf6] text-sm subtitle hover:bg-[#feebf6] hover:text-[#687fe5] transition-colors border border-[#feebf6]" data-status="reading" data-book='${JSON.stringify(book)}'>
+                  <button class="reading-status-btn w-full py-1 px-2 bg-transparent text-[#687fe5] text-sm subtitle border border-[#687fe5]" data-status="reading" data-book='${JSON.stringify(book)}'>
                     reading
                   </button>
-                  <button class="reading-status-btn w-full py-1 px-2 bg-transparent text-[#feebf6] text-sm subtitle hover:bg-[#feebf6] hover:text-[#687fe5] transition-colors border border-[#feebf6]" data-status="want" data-book='${JSON.stringify(book)}'>
+                  <button class="reading-status-btn w-full py-1 px-2 bg-transparent text-[#687fe5] text-sm subtitle border border-[#687fe5]" data-status="want" data-book='${JSON.stringify(book)}'>
                     will read
                   </button>
                 </div>

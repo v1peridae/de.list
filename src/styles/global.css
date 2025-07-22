@@ -17,11 +17,6 @@
   src: url("/subtitles.ttf") format("truetype");
 }
 
-@font-face {
-  font-family: "ButtonsFont";
-  src: url("/buttons.ttf") format("truetype");
-}
-
 :root {
   background-color: #feebf6;
   color: #687fe5;
@@ -45,7 +40,13 @@ nav {
 }
 
 .button {
-  font-family: "ButtonsFont", sans-serif;
+  font-family: "NavbarFont", sans-serif;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
 }
 
 .navbar {
