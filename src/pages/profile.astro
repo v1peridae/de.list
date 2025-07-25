@@ -317,12 +317,15 @@ import Header from "../components/Header.astro";
           const query = author ? `${title} ${author}` : title;
           const encodedQuery = encodeURIComponent(query);
 
-          const searchResponse = await fetch(`https://openlibrary.org/search.json?title=${encodedQuery}&limit=1`);
+          const searchResponse = await fetch(`https://openlibrary.org/search.json?q=${encodedQuery}&limit=1`);
           const searchData = await searchResponse.json();
 
           if (searchData.docs && searchData.docs.length > 0) {
             const book = searchData.docs[0];
 
+            if (book.cover_i) {
+              return `https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg`;
+            }
             if (book.isbn && book.isbn.length > 0) {
               const isbn = book.isbn[0];
               return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
@@ -404,10 +407,12 @@ import Header from "../components/Header.astro";
         coverContainers.forEach(async (container) => {
           const bookTitle = (container as HTMLElement).dataset.bookTitle;
           const bookAuthor = (container as HTMLElement).dataset.bookAuthor;
+          const bookCoverUrl = (container as HTMLElement).dataset.bookCoverUrl;
           const img = container.querySelector(".book-cover-img") as HTMLImageElement;
           const loadingText = container.querySelector(".loading-text") as HTMLElement;
+          let coverUrl = bookCoverUrl;
 
-          if (bookTitle) {
+          if (!coverUrl && bookTitle) {
             try {
               const coverUrl = await fetchBookCover(bookTitle, bookAuthor);
               if (coverUrl) {

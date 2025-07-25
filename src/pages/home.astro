@@ -263,10 +263,12 @@ import Header from "../components/Header.astro";
         }
 
         const token = await user.getIdToken();
+        const coverUrl = book.cover_i ? `https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg` : null;
 
         const bookData = {
           title: book.title,
           author: book.author_name?.[0] || "",
+          coverUrl: coverUrl,
           started: options.started || null,
           finished: options.finished || null,
           notes: options.notes || "",
