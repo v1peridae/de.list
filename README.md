@@ -13,7 +13,7 @@ repo : you're here
 
 If you are any of the 5, I GOT YOU >:)
 
-![](breh\image.png/)
+![](breh/image.png)
 
 de.list is a chill app for yappers who enjoy to read where you can talk about YOUR faves, get to spy on what your friends are reading and keep track of what you're reading :)
 
@@ -22,12 +22,12 @@ i built it because i have a hard time using goodreads and i really wanted to do 
 ## you can
 
 have some pretty sick profile customisation :)<br>
-![](breh\image1.png/)
+![](breh/image1.png)
 
 <br>
 have a sick friend code !! pssst...please add me, i want friends! </3
 
-![](breh\image2.png/)
+![](breh/image2.png)
 
 ### see what your friends are reading!!!
 
