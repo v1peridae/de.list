@@ -20,8 +20,8 @@ import Header from "../components/Header.astro";
           <input
             type="text"
             id="searchInput"
-            placeholder="what have you been reading?"
-            class="w-full bg-transparent border-b-2 text-4xl outline-none border-none subtitle"
+            placeholder="do tell what's on your mind!"
+            class="w-full bg-transparent border-b-2 text-4xl outline-none border-none subtitle text-[#687fe5]"
           />
         </div>
         <div id="searchResults" class="mt-6 grid grid-cols-3 gap-6"></div>
@@ -64,14 +64,12 @@ import Header from "../components/Header.astro";
               <textarea id="bookNotes" class="w-full h-40 bg-transparent border-2 border-[#687fe5] p-4 subtitle resize-none outline-none"
               ></textarea>
             </div>
-
             <div class="mb-6">
               <label class="block subtitle text-lg mb-2">favourite sections:</label>
               <textarea
                 id="favouriteSections"
                 class="w-full h-24 bg-transparent border-2 border-[#687fe5] p-4 subtitle resize-none outline-none"></textarea>
             </div>
-
             <div class="mb-6">
               <div class="flex items-center gap-4">
                 <span class="subtitle">add media!</span>
@@ -156,7 +154,6 @@ import Header from "../components/Header.astro";
       if (!files) return;
 
       if (uploadedFiles.length + files.length > 8) {
-        alert("You can only upload up to 8 files");
         return;
       }
 
@@ -262,7 +259,6 @@ import Header from "../components/Header.astro";
         const user = auth.currentUser;
 
         if (!user) {
-          alert("Please log in to save books");
           return;
         }
 
@@ -305,11 +301,10 @@ import Header from "../components/Header.astro";
             document.body.removeChild(successDiv);
           }, 3000);
         } else {
-          alert("Error saving book");
+          console.error("Error saving book");
         }
       } catch (error) {
         console.error("Error saving book:", error);
-        alert("Error saving book");
       }
     }
 

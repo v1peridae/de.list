@@ -44,10 +44,35 @@ async function authenticateUser(request: Request) {
 
 export async function GET({ request }: { request: Request }) {
   try {
-    const { userId, decodedToken } = await authenticateUser(request);
-
     const url = new URL(request.url);
     const action = url.searchParams.get("action");
+    if (action === "resolve-username") {
+      const username = url.searchParams.get("username");
+      if (!username) {
+        return new Response(JSON.stringify({ error: "Username required" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { username },
+        select: { email: true },
+      });
+
+      if (!user) {
+        return new Response(JSON.stringify({ error: "Username not found" }), {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ email: user.email }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    const { userId, decodedToken } = await authenticateUser(request);
 
     if (action === "my-code") {
       let user = await prisma.user.findUnique({
@@ -385,6 +410,20 @@ export async function POST({ request }: { request: Request }) {
       if (!title) {
         return new Response(JSON.stringify({ error: "Title is required" }), {
           status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      const existing = await prisma.book.findFirst({
+        where: {
+          userId,
+          title: { equals: title, mode: "insensitive" },
+          ...(author ? { author: { equals: author, mode: "insensitive" } } : { author: null }),
+        },
+      });
+
+      if (existing) {
+        return new Response(JSON.stringify({ error: "Book already exists" }), {
+          status: 409,
           headers: { "Content-Type": "application/json" },
         });
       }

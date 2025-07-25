@@ -21,20 +21,20 @@ import { AstroFont } from "astro-font";
           type="password"
           id="password"
           placeholder="password"
-          class="bg-transparent border-b-2 text-3xl outline-none border-none subtitle"
+          class="bg-transparent border-b-2 text-2xl outline-none border-none subtitle"
         />
         <input
           type="password"
           id="confirmPassword"
           placeholder="confirm password"
-          class="bg-transparent border-b-2 text-3xl outline-none border-none subtitle"
+          class="bg-transparent border-b-2 text-2xl outline-none border-none subtitle text-[#687fe5]"
         />
         <div class="flex justify-between items-center mt-2">
-          <a href="/login" class="navbar text-2xl">already have an account?</a>
+          <a href="/login" class="navbar text-xl underline">already have an account?</a>
         </div>
         <button type="button" id="googleSignUp" class="button mt-6 text-2xl">sign up with google</button>
         <div class="flex justify-center">--------------------------------------------</div>
-        <button type="submit" class="button mt-2 text-2xl font-bold">sign up</button>
+        <button type="submit" class="button mt-2 text-2xl">sign up</button>
       </form>
     </div>
 
@@ -56,12 +56,10 @@ import { AstroFont } from "astro-font";
           if (!emailInput || !passwordInput || !confirmPasswordInput) return;
 
           if (passwordInput.value !== confirmPasswordInput.value) {
-            alert("Passwords do not match!");
             return;
           }
 
           if (passwordInput.value.length < 6) {
-            alert("Password must be at least 6 characters long!");
             return;
           }
 
@@ -71,15 +69,6 @@ import { AstroFont } from "astro-font";
             window.location.href = "/onboarding";
           } catch (error: any) {
             console.error("Error creating user:", error);
-            if (error.code === "auth/email-already-in-use") {
-              alert("An account with this email already exists!");
-            } else if (error.code === "auth/invalid-email") {
-              alert("Please enter a valid email address!");
-            } else if (error.code === "auth/weak-password") {
-              alert("Password is too weak. Please choose a stronger password!");
-            } else {
-              alert("Failed to create account. Please try again.");
-            }
           }
         });
 
@@ -90,11 +79,6 @@ import { AstroFont } from "astro-font";
             window.location.href = "/onboarding";
           } catch (error: any) {
             console.error("Error signing up with Google:", error);
-            if (error.code === "auth/account-exists-with-different-credential") {
-              alert("An account with this email already exists with a different sign-in method!");
-            } else {
-              alert("Failed to sign up with Google. Please try again.");
-            }
           }
         });
       }
