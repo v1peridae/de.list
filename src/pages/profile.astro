@@ -50,7 +50,7 @@ import Header from "../components/Header.astro";
 
           <div class="text-left">
             <h2 id="username" class="text-4xl subtitle text-[#687fe5] mb-2">@username</h2>
-            <h3 id="displayName" class="text-2xl titles text-[#687fe5]">Display Name</h3>
+            <h3 id="displayName" class="text-2xl titles text-[#687fe5]">display name</h3>
             <p id="bio" class="text-lg subtitle text-[#687fe5] mt-2 max-w-md"></p>
           </div>
         </div>
@@ -96,23 +96,23 @@ import Header from "../components/Header.astro";
     <div id="finishBookModal" class="fixed inset-0 flex items-center justify-center hidden z-50">
       <div class="bg-[#feebf6] text-[#687fe5] p-8 max-w-2xl w-full mx-4 border-2 border-[#687fe5]">
         <div class="flex justify-between items-start mb-6">
-          <h3 class="titles text-2xl">Mark as Finished</h3>
+          <h3 class="titles text-2xl">mark as done!</h3>
           <button id="closeFinishModal" class="navbar text-3xl"> <span class="text-xl">(close)</span></button>
         </div>
 
         <form id="finishBookForm" class="space-y-4">
           <div>
-            <h4 id="finishBookTitle" class="titles text-lg mb-2">Book Title</h4>
-            <p id="finishBookAuthor" class="subtitle text-sm opacity-75 mb-4">Author</p>
+            <h4 id="finishBookTitle" class="titles text-lg mb-2">book title</h4>
+            <p id="finishBookAuthor" class="subtitle text-sm opacity-75 mb-4">author</p>
           </div>
 
           <div>
-            <label for="finishDate" class="block subtitle text-sm mb-1">Finished reading:</label>
+            <label for="finishDate" class="block subtitle text-sm mb-1">done reading:</label>
             <input type="date" id="finishDate" class="w-full bg-transparent border-b border-[#687fe5] subtitle text-sm outline-none pb-1" />
           </div>
 
           <div>
-            <label for="finishNotes" class="block subtitle text-lg mb-2">My notes about it:</label>
+            <label for="finishNotes" class="block subtitle text-lg mb-2">my yap about it</label>
             <textarea
               id="finishNotes"
               class="w-full h-32 bg-transparent border-2 border-[#687fe5] p-4 subtitle resize-none outline-none"
@@ -120,7 +120,7 @@ import Header from "../components/Header.astro";
           </div>
 
           <div>
-            <label for="favouriteSections" class="block subtitle text-lg mb-2">Favourite sections:</label>
+            <label for="favouriteSections" class="block subtitle text-lg mb-2">fave sections!</label>
             <textarea
               id="favouriteSections"
               class="w-full h-32 bg-transparent border-2 border-[#687fe5] p-4 subtitle resize-none outline-none"
@@ -139,13 +139,13 @@ import Header from "../components/Header.astro";
     <div id="editModal" class="fixed inset-0 flex items-center justify-center hidden z-50 bg-[#feebf6] bg-opacity-50">
       <div class="bg-[#feebf6] text-[#687fe5] p-8 max-w-md w-full mx-4 border-2 border-[#687fe5]">
         <div class="flex justify-between items-center mb-6">
-          <h3 class="text-2xl titles">Edit Profile</h3>
+          <h3 class="text-2xl titles">edit profile</h3>
           <button id="closeEditModal" class="navbar text-2xl">close</button>
         </div>
 
         <form id="editProfileForm" class="space-y-4">
           <div>
-            <label for="editDisplayName" class="block subtitle text-lg mb-1">Display Name</label>
+            <label for="editDisplayName" class="block subtitle text-lg mb-1">display name</label>
             <input
               type="text"
               id="editDisplayName"
@@ -154,7 +154,7 @@ import Header from "../components/Header.astro";
           </div>
 
           <div>
-            <label for="editUsername" class="block subtitle text-lg mb-1">Username</label>
+            <label for="editUsername" class="block subtitle text-lg mb-1">username</label>
             <input
               type="text"
               id="editUsername"
@@ -164,7 +164,7 @@ import Header from "../components/Header.astro";
           </div>
 
           <div>
-            <label for="editBio" class="block subtitle text-lg mb-1">Bio</label>
+            <label for="editBio" class="block subtitle text-lg mb-1">bio</label>
             <textarea
               id="editBio"
               rows="3"
@@ -172,7 +172,7 @@ import Header from "../components/Header.astro";
           </div>
 
           <div>
-            <label for="editProfilePic" class="block subtitle text-lg mb-1">Profile Picture</label>
+            <label for="editProfilePic" class="block subtitle text-lg mb-1">profile picture</label>
             <input
               type="file"
               id="editProfilePic"
@@ -182,8 +182,8 @@ import Header from "../components/Header.astro";
           </div>
 
           <div class="flex gap-4 pt-4">
-            <button type="submit" class="flex-1 button text-lg py-2 border-2 border-[#687fe5]"> Save Changes </button>
-            <button type="button" id="cancelEdit" class="flex-1 button text-lg py-2 text-[#687fe5]"> Cancel </button>
+            <button type="submit" class="flex-1 button text-lg py-2 border-2 border-[#687fe5]"> save </button>
+            <button type="button" id="cancelEdit" class="flex-1 button text-lg py-2 text-[#687fe5]"> cancel </button>
           </div>
         </form>
       </div>
@@ -366,7 +366,7 @@ import Header from "../components/Header.astro";
         if (!section) return;
 
         if (books.length === 0) {
-          section.innerHTML = '<p class="subtitle text-lg opacity-60">No books yet</p>';
+          section.innerHTML = '<p class="subtitle text-lg opacity-60">no books yet :/</p>';
           return;
         }
 
@@ -377,7 +377,7 @@ import Header from "../components/Header.astro";
             <div class="flex gap-4">
               <div class="flex-shrink-0">
                 <div class="w-16 h-24 bg-[#687fe5] flex items-center justify-center text-[#feebf6] text-xs text-center book-cover-container" data-book-title="${book.title}" data-book-author="${book.author || ""}">
-                  <div class="loading-text">Loading...</div>
+                  <div class="loading-text">loading...</div>
                   <img class="book-cover-img w-full h-full object-cover hidden" alt="${book.title}" />
                 </div>
               </div>
@@ -417,13 +417,13 @@ import Header from "../components/Header.astro";
                   img.classList.remove("hidden");
                 };
                 img.onerror = () => {
-                  loadingText.innerHTML = "BOOK<br/>COVER";
+                  loadingText.innerHTML = "book<br/>cover";
                 };
               } else {
-                loadingText.innerHTML = "BOOK<br/>COVER";
+                loadingText.innerHTML = "book<br/>cover";
               }
             } catch (error) {
-              loadingText.innerHTML = "BOOK<br/>COVER";
+              loadingText.innerHTML = "book<br/>cover";
             }
           }
         });

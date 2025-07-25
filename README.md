@@ -1,47 +1,60 @@
-# Astro Starter Kit: Minimal
+# de.list :)
 
-```sh
-npm create astro@latest -- --template minimal
-```
+link : https://delist.page <br>
+repo : you're here
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/minimal)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/minimal)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/minimal/devcontainer.json)
+### are you someone who :
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+1. ENJOYS YEARNING
+2. LOVES TO READ
+3. DISLIKES GOODREADS
+4. LOVES LETTERBOXD
+5. MAY BE NOSEY
 
-## 🚀 Project Structure
+If you are any of the 5, I GOT YOU >:)
 
-Inside of your Astro project, you'll see the following folders and files:
+![](breh\image.png/)
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+de.list is a chill app for yappers who enjoy to read where you can talk about YOUR faves, get to spy on what your friends are reading and keep track of what you're reading :)
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+i built it because i have a hard time using goodreads and i really wanted to do something special to do with books !
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## you can
 
-Any static assets, like images, can be placed in the `public/` directory.
+have some pretty sick profile customisation :)<br>
+![](breh\image1.png/)
 
-## 🧞 Commands
+<br>
+have a sick friend code !! pssst...please add me, i want friends! </3
 
-All commands are run from the root of the project, from a terminal:
+![](breh\image2.png/)
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+### see what your friends are reading!!!
 
-## 👀 Want to learn more?
+i would show you but i dont have any friends here and i was too scared to ask anyone to test it :heavysob:
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+### nerd stuff?? :P
+
+built with astro, react, tailwind<br>
+postgres via prisma, my beloved<br>
+firebase for auth
+
+### if you wanna run it locally....
+
+ngl idk how to direct you, im sorry :'). you could try:
+
+1. you can clone this repo
+2. `npm install`
+3. `npm run dev`
+
+### license
+
+mit --i really do NOT care what you do <3
+
+<br>
+
+something you want to see or don't like? dm @lou on the hackclub slack, create an issue (or pr :P) or send a homing pigeon !
+
+<br>
+
+made with <3 and :3 by [@v1peridae](https://github.com/v1peridae)
