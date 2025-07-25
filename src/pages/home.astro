@@ -331,18 +331,28 @@ import Header from "../components/Header.astro";
         const data = await response.json();
 
         const booksWithCovers = data.docs
-          .filter((book: any) => book.cover_i && book.author_name && book.author_name.length > 0 && book.first_publish_year)
+          .filter((book: any) => book.author_name && book.author_name.length > 0 && book.first_publish_year)
           .slice(0, 6)
           .map(
             (book: any) => `
             <div class="book-result flex flex-col items-center text-center relative group" data-book='${JSON.stringify(book)}'>
               <div class="relative">
-                <img 
-                  src="https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg" 
-                  alt="${book.title}" 
-                  class="w-32 h-48 object-cover"
-                />
-                <div class="absolute inset-0 bg-[#feebf6] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center gap-2 px-2">
+                ${
+                  book.cover_i
+                    ? `<img 
+                    src="https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg" 
+                    alt="${book.title}" 
+                    class="w-32 h-48 object-cover"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                  />
+                  <div class="w-32 h-48 bg-[#687fe5] flex items-center justify-center text-[#feebf6] text-sm subtitle text-center px-2" style="display: none;">
+                    ${book.title}
+                  </div>`
+                    : `<div class="w-32 h-48 bg-[#687fe5] flex items-center justify-center text-[#feebf6] text-sm subtitle text-center px-2">
+                    ${book.title}
+                  </div>`
+                }
+                <div class="absolute inset-0 bg-[#feebf6] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center gap-2 px-2" onclick="event.stopPropagation();">
                   <button class="reading-status-btn w-full py-1 px-2 bg-[#687fe5] text-[#feebf6] text-sm subtitle border border-[#687fe5]" data-status="finished" data-book='${JSON.stringify(book)}'>
                     read
                   </button>
@@ -380,10 +390,20 @@ import Header from "../components/Header.astro";
         const statusButtons = searchResults.querySelectorAll(".reading-status-btn");
         statusButtons.forEach((button) => {
           button.addEventListener("click", (e) => {
+            e.preventDefault();
             e.stopPropagation();
             const bookData = JSON.parse((button as HTMLElement).dataset.book || "{}");
             const status = (button as HTMLElement).dataset.status;
-            handleBookStatus(bookData, status);
+
+            if (status === "finished") {
+              handleBookStatus(bookData, status);
+            } else if (status === "reading" || status === "want") {
+              handleBookStatus(bookData, status);
+              const modal = document.getElementById("bookModal");
+              if (modal && !modal.classList.contains("hidden")) {
+                modal.classList.add("hidden");
+              }
+            }
           });
         });
       } catch (error) {
