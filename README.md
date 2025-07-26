@@ -5,13 +5,12 @@ repo : you're here
 
 ### are you someone who :
 
-1. ENJOYS YEARNING
-2. LOVES TO READ
-3. DISLIKES GOODREADS
-4. LOVES LETTERBOXD
-5. MAY BE NOSEY
+1. LOVES TO READ
+2. DISLIKES GOODREADS
+3. LOVES LETTERBOXD
+4. MAY BE NOSEY
 
-If you are any of the 5, I GOT YOU >:)
+If you are any of the 4, I GOT YOU >:)
 
 ![](breh/image.png)
 
@@ -21,17 +20,19 @@ i built it because i have a hard time using goodreads and i really wanted to do 
 
 ## you can
 
-have some pretty sick profile customisation :)<br>
+### have some pretty sick profile customisation :)<br>
+
 ![](breh/image1.png)
 
-<br>
-have a sick friend code !! pssst...please add me, i want friends! </3
+### have a sick friend code !! pssst...please add me, i want friends! </3
 
 ![](breh/image2.png)
 
+> i did friend codes because they seem cool and someone needs to do the intentional act of giving you their friend code :)
+
 ### see what your friends are reading!!!
 
-i would show you but i dont have any friends here and i was too scared to ask anyone to test it :heavysob:
+![](breh/image3.png)
 
 ### nerd stuff?? :P
 
