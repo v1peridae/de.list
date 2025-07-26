@@ -46,6 +46,32 @@ export async function GET({ request }: { request: Request }) {
   try {
     const url = new URL(request.url);
     const action = url.searchParams.get("action");
+
+    if (action === "check-username-availability") {
+      const username = url.searchParams.get("username");
+      if (!username) {
+        return new Response(JSON.stringify({ error: "Username required" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        return new Response(JSON.stringify({ available: false, error: "Username can only contain letters, numbers, and underscores" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      const user = await prisma.user.findUnique({
+        where: { username },
+        select: { id: true },
+      });
+
+      return new Response(JSON.stringify({ available: !user }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "resolve-username") {
       const username = url.searchParams.get("username");
       if (!username) {

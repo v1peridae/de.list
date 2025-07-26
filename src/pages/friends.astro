@@ -18,7 +18,7 @@ import Header from "../components/Header.astro";
       <div class="flex gap-8">
         <div class="w-2/3">
           <h2 class="title text-3xl mb-6">your friends</h2>
-          <div id="friendsList" class="friends-list space-y-4">
+          <div id="friendsList" class="friends-list space-y-0">
             <div class="text-center subtitle text-lg text-[#687fe5] opacity-75">loading your friends...</div>
           </div>
         </div>
@@ -257,10 +257,13 @@ import Header from "../components/Header.astro";
       function renderFriends(friends: any[]) {
         const friendsHtml = friends
           .map(
-            (friend) => `
-          <div class="friend-item bg-[#feebf6] border-b-1 border-[#687fe5] p-4 cursor-pointer" 
+            (friend, index) => `
+          <div class="friend-item bg-[#feebf6] border-b-1 border-[#687fe5] p-2 cursor-pointer" 
                onclick="window.location.href='/profile?userId=${friend.id}'">
             <div class="flex items-center gap-4">
+              <div class="w-8 text-center">
+                <span class="subtitle text-lg text-[#687fe5] opacity-75">${index + 1}.</span>
+              </div>
               <div class="flex-1">
                 <h3 class="subtitle text-xl text-[#687fe5]">@${friend.username}</h3>
               </div>

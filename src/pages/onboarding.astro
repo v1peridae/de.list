@@ -84,6 +84,7 @@ import Header from "../components/Header.astro";
                 required
               />
             </div>
+            <div id="usernameWarning" class="text-[#687fe5] navbar text-sm mt-1 hidden"></div>
           </div>
         </div>
 
@@ -161,26 +162,50 @@ import Header from "../components/Header.astro";
         return true;
       }
 
+      let isUsernameAvailable = false;
+
       async function checkUsernameAvailability() {
         const usernameInput = document.getElementById("usernameInput") as HTMLInputElement;
+        const usernameWarning = document.getElementById("usernameWarning");
         const value = usernameInput?.value.trim();
 
-        if (!currentUser || !value || !/^[a-zA-Z0-9_]+$/.test(value)) {
+        if (!value || value.length < 1) {
+          if (usernameWarning) {
+            usernameWarning.classList.add("hidden");
+          }
+          isUsernameAvailable = false;
           return;
         }
 
         try {
-          const token = await currentUser.getIdToken();
-          const response = await fetch("/api/friends?action=update-profile", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ username: value }),
-          });
+          const response = await fetch(`/api/friends?action=check-username-availability&username=${encodeURIComponent(value)}`);
+          const data = await response.json();
+
+          if (data.error) {
+            if (usernameWarning) {
+              usernameWarning.textContent = data.error;
+              usernameWarning.classList.remove("hidden");
+            }
+            isUsernameAvailable = false;
+          } else if (!data.available) {
+            if (usernameWarning) {
+              usernameWarning.textContent = "Username is already taken";
+              usernameWarning.classList.remove("hidden");
+            }
+            isUsernameAvailable = false;
+          } else {
+            if (usernameWarning) {
+              usernameWarning.classList.add("hidden");
+            }
+            isUsernameAvailable = true;
+          }
         } catch (error) {
           console.error("Error checking username:", error);
+          if (usernameWarning) {
+            usernameWarning.textContent = "Error checking username availability";
+            usernameWarning.classList.remove("hidden");
+          }
+          isUsernameAvailable = false;
         }
       }
 
@@ -188,6 +213,14 @@ import Header from "../components/Header.astro";
         e.preventDefault();
 
         if (!validateForm() || !currentUser) return;
+        if (!isUsernameAvailable) {
+          const usernameWarning = document.getElementById("usernameWarning");
+          if (usernameWarning) {
+            usernameWarning.textContent = "Please choose an available username";
+            usernameWarning.classList.remove("hidden");
+          }
+          return;
+        }
 
         const loadingModal = document.getElementById("loadingModal");
         loadingModal?.classList.remove("hidden");
