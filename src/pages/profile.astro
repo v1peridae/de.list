@@ -94,45 +94,70 @@ import Header from "../components/Header.astro";
     </div>
 
     <div id="finishBookModal" class="fixed inset-0 flex items-center justify-center hidden z-50">
-      <div class="bg-[#feebf6] text-[#687fe5] p-8 max-w-2xl w-full mx-4 border-2 border-[#687fe5]">
+      <div class="bg-[#feebf6] text-[#687fe5] p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto border-2 border-[#687fe5]">
         <div class="flex justify-between items-start mb-6">
-          <h3 class="titles text-2xl">mark as done!</h3>
+          <div></div>
           <button id="closeFinishModal" class="navbar text-3xl"> <span class="text-xl">(close)</span></button>
         </div>
 
-        <form id="finishBookForm" class="space-y-4">
-          <div>
-            <h4 id="finishBookTitle" class="titles text-lg mb-2">book title</h4>
-            <p id="finishBookAuthor" class="subtitle text-sm opacity-75 mb-4">author</p>
+        <div class="flex gap-8">
+          <div class="flex-shrink-0 w-48">
+            <div class="flex flex-col items-center">
+              <div id="finishBookCover" class="w-full h-72 bg-[#687fe5] flex items-center justify-center text-[#feebf6] text-lg mb-4"></div>
+              <h1 id="finishBookTitle" class="w-full text-center titles text-2xl outline-none mb-2" contenteditable="true">book name</h1>
+              <div class="text-lg subtitle space-y-1 w-full">
+                <div>
+                  <span>started reading: </span>
+                  <input
+                    type="date"
+                    id="finishStartedReading"
+                    class="bg-transparent border-b border-[#687fe5] subtitle text-sm outline-none pb-1"
+                  />
+                  <span class="text-xs opacity-60"> (optional)</span>
+                </div>
+                <div>
+                  <span>finished reading: </span>
+                  <input
+                    type="date"
+                    id="finishFinishedReading"
+                    class="bg-transparent border-b border-[#687fe5] subtitle text-sm outline-none"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label for="finishDate" class="block subtitle text-sm mb-1">done reading:</label>
-            <input type="date" id="finishDate" class="w-full bg-transparent border-b border-[#687fe5] subtitle text-sm outline-none pb-1" />
-          </div>
+          <div class="flex-1">
+            <div class="mb-6">
+              <label class="block subtitle text-lg mb-2">my notes about it:</label>
+              <textarea
+                id="finishBookNotes"
+                class="w-full h-40 bg-transparent border-2 border-[#687fe5] p-4 subtitle resize-none outline-none"></textarea>
+            </div>
+            <div class="mb-6">
+              <label class="block subtitle text-lg mb-2">favourite sections:</label>
+              <textarea
+                id="finishFavouriteSections"
+                class="w-full h-24 bg-transparent border-2 border-[#687fe5] p-4 subtitle resize-none outline-none"></textarea>
+            </div>
+            <div class="mb-6">
+              <div class="flex items-center gap-4">
+                <span class="subtitle">add media!</span>
+                <input type="file" id="finishMediaUpload" accept="image/*,video/*,audio/*" multiple class="hidden" />
+                <button type="button" id="finishAttachFilesBtn" class="border-2 border-[#687fe5] px-4 py-2 navbar text-xl">
+                  attach files
+                </button>
+              </div>
+              <div id="finishMediaPreview" class="mt-4 grid grid-cols-4 gap-4"></div>
+            </div>
 
-          <div>
-            <label for="finishNotes" class="block subtitle text-lg mb-2">my yap about it</label>
-            <textarea
-              id="finishNotes"
-              class="w-full h-32 bg-transparent border-2 border-[#687fe5] p-4 subtitle resize-none outline-none"
-              placeholder="What do you think about this book?"></textarea>
+            <div class="flex justify-end">
+              <button id="finishSubmitBook" type="button" class="bg-[#687fe5] text-[#feebf6] px-8 py-3 navbar text-xl">
+                mark as finished &lt;3
+              </button>
+            </div>
           </div>
-
-          <div>
-            <label for="favouriteSections" class="block subtitle text-lg mb-2">fave sections!</label>
-            <textarea
-              id="favouriteSections"
-              class="w-full h-32 bg-transparent border-2 border-[#687fe5] p-4 subtitle resize-none outline-none"
-              placeholder="..."></textarea>
-          </div>
-
-          <div class="flex justify-end gap-4 mt-6">
-            <button type="button" id="cancelFinish" class="border-2 border-[#687fe5] text-[#687fe5] px-6 py-2 navbar text-lg">cancel</button
-            >
-            <button type="submit" class="bg-[#687fe5] text-[#feebf6] px-6 py-2 navbar text-lg">mark as finished &lt;3</button>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
 
@@ -376,7 +401,7 @@ import Header from "../components/Header.astro";
         section.innerHTML = books
           .map(
             (book: any) => `
-          <div class="book-item bg-[#feebf6] border-2 border-[#687fe5] p-4" data-book-id="${book.id}">
+          <div class="book-item bg-[#feebf6] border-b-2 border-[#687fe5] p-4" data-book-id="${book.id}">
             <div class="flex gap-4">
               <div class="flex-shrink-0">
                 <div class="w-16 h-24 bg-[#687fe5] flex items-center justify-center text-[#feebf6] text-xs text-center book-cover-container" data-book-title="${book.title}" data-book-author="${book.author || ""}">
@@ -387,8 +412,8 @@ import Header from "../components/Header.astro";
               <div class="flex-1">
                 <div class="flex justify-between items-start">
                   <div class="flex-1">
-                    <h5 class="titles text-lg text-[#687fe5] mb-1">${book.title}</h5>
-                    ${book.author ? `<p class="subtitle text-sm text-[#687fe5] opacity-75 mb-2">${book.author}</p>` : ""}
+                    <h5 class="subtitle text-lg text-[#687fe5] mb-1">${book.title}</h5>
+                    ${book.author ? `<p class="navbar text-lg text-[#687fe5] opacity-75 mb-2">${book.author}</p>` : ""}
                     <div class="flex gap-3 mb-2">
                       ${getActionButtons(book, activeTab)}
                     </div>
@@ -511,18 +536,95 @@ import Header from "../components/Header.astro";
       }
 
       let currentFinishingBookId: string | null = null;
+      let finishUploadedFiles: File[] = [];
 
-      function openFinishBookModal(bookId: string, title: string, author: string | undefined) {
+      function clearFinishMediaPreview() {
+        const mediaPreview = document.getElementById("finishMediaPreview");
+        const mediaUpload = document.getElementById("finishMediaUpload") as HTMLInputElement;
+        if (mediaPreview) mediaPreview.innerHTML = "";
+        finishUploadedFiles = [];
+        if (mediaUpload) {
+          mediaUpload.value = "";
+        }
+      }
+
+      function updateFinishMediaPreview() {
+        const mediaPreview = document.getElementById("finishMediaPreview");
+        if (!mediaPreview) return;
+
+        mediaPreview.innerHTML = "";
+
+        finishUploadedFiles.forEach((file, index) => {
+          const previewContainer = document.createElement("div");
+          previewContainer.className = "relative border-2 border-[#687fe5] p-2 rounded";
+
+          const fileCounter = document.createElement("span");
+          fileCounter.textContent = `${index + 1}/8`;
+          fileCounter.className = "absolute top-1 left-1 text-[#687fe5] text-xs subtitle";
+
+          const removeBtn = document.createElement("button");
+          removeBtn.innerHTML = "&times;";
+          removeBtn.className = "absolute top-1 right-1 text-[#687fe5] text-xl";
+          removeBtn.onclick = () => {
+            finishUploadedFiles.splice(index, 1);
+            updateFinishMediaPreview();
+          };
+
+          if (file.type.startsWith("image/")) {
+            const img = document.createElement("img");
+            img.src = URL.createObjectURL(file);
+            img.className = "w-full h-32 object-cover";
+            previewContainer.appendChild(img);
+          } else if (file.type.startsWith("video/")) {
+            const video = document.createElement("video");
+            video.src = URL.createObjectURL(file);
+            video.className = "w-full h-32 object-cover";
+            video.controls = true;
+            previewContainer.appendChild(video);
+          } else if (file.type.startsWith("audio/")) {
+            const audio = document.createElement("audio");
+            audio.src = URL.createObjectURL(file);
+            audio.className = "w-full mt-4";
+            audio.controls = true;
+            previewContainer.appendChild(audio);
+          }
+
+          const fileName = document.createElement("p");
+          fileName.textContent = file.name;
+          fileName.className = "subtitle text-sm mt-2 truncate";
+
+          previewContainer.appendChild(fileCounter);
+          previewContainer.appendChild(removeBtn);
+          previewContainer.appendChild(fileName);
+          mediaPreview.appendChild(previewContainer);
+        });
+      }
+
+      async function openFinishBookModal(bookId: string, title: string, author: string | undefined) {
         currentFinishingBookId = bookId;
 
         const modal = document.getElementById("finishBookModal");
         const titleEl = document.getElementById("finishBookTitle");
-        const authorEl = document.getElementById("finishBookAuthor");
-        const dateInput = document.getElementById("finishDate") as HTMLInputElement;
+        const bookCover = document.getElementById("finishBookCover");
+        const startedInput = document.getElementById("finishStartedReading") as HTMLInputElement;
+        const finishedInput = document.getElementById("finishFinishedReading") as HTMLInputElement;
 
         if (titleEl) titleEl.textContent = title;
-        if (authorEl) authorEl.textContent = author || "Unknown Author";
-        if (dateInput) dateInput.value = new Date().toISOString().split("T")[0];
+        if (finishedInput) finishedInput.value = new Date().toISOString().split("T")[0];
+        if (bookCover) {
+          const coverUrl = await fetchBookCover(title, author);
+          if (coverUrl) {
+            bookCover.innerHTML = `<img src="${coverUrl}" alt="${title}" class="w-full h-full object-cover" />`;
+          } else {
+            bookCover.innerHTML = `<div class="text-white text-center">BOOK COVER</div>`;
+          }
+        }
+        const book = [...currentlyReadingBooks, ...alreadyReadBooks, ...wantToReadBooks].find((b) => b.id === bookId);
+        if (book && book.started && startedInput) {
+          startedInput.value = book.started.split("T")[0];
+        }
+
+        clearFinishMediaPreview();
 
         if (modal) modal.classList.remove("hidden");
       }
@@ -531,28 +633,35 @@ import Header from "../components/Header.astro";
         const modal = document.getElementById("finishBookModal");
         if (modal) modal.classList.add("hidden");
 
-        (document.getElementById("finishNotes") as HTMLTextAreaElement).value = "";
-        (document.getElementById("favouriteSections") as HTMLTextAreaElement).value = "";
+        (document.getElementById("finishBookNotes") as HTMLTextAreaElement).value = "";
+        (document.getElementById("finishFavouriteSections") as HTMLTextAreaElement).value = "";
+        clearFinishMediaPreview();
         currentFinishingBookId = null;
       }
 
-      async function finishBook(bookId: string, finishDate: string, notes: string, favourite: string) {
+      async function finishBook(bookId: string, startDate: string, finishDate: string, notes: string, favourite: string) {
         if (!currentUser) return;
 
         try {
           const token = await currentUser.getIdToken();
+          const updateData: any = {
+            bookId,
+            finished: finishDate,
+            notes: notes || undefined,
+            favourite: favourite || undefined,
+          };
+
+          if (startDate) {
+            updateData.started = startDate;
+          }
+
           const response = await fetch("/api/books", {
             method: "PUT",
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-              bookId,
-              finished: finishDate,
-              notes: notes || undefined,
-              favourite: favourite || undefined,
-            }),
+            body: JSON.stringify(updateData),
           });
 
           if (response.ok) {
@@ -729,28 +838,42 @@ import Header from "../components/Header.astro";
 
       const finishBookModal = document.getElementById("finishBookModal");
       const closeFinishModal = document.getElementById("closeFinishModal");
-      const cancelFinish = document.getElementById("cancelFinish");
-      const finishBookForm = document.getElementById("finishBookForm");
 
       if (closeFinishModal) {
         closeFinishModal.addEventListener("click", closeFinishBookModal);
       }
 
-      if (cancelFinish) {
-        cancelFinish.addEventListener("click", closeFinishBookModal);
+      const finishAttachFilesBtn = document.getElementById("finishAttachFilesBtn");
+      const finishMediaUpload = document.getElementById("finishMediaUpload") as HTMLInputElement;
+      const finishSubmitBook = document.getElementById("finishSubmitBook");
+
+      if (finishAttachFilesBtn && finishMediaUpload) {
+        finishAttachFilesBtn.addEventListener("click", () => {
+          finishMediaUpload.click();
+        });
+
+        finishMediaUpload.addEventListener("change", (e) => {
+          const files = (e.target as HTMLInputElement).files;
+          if (!files) return;
+          if (finishUploadedFiles.length + files.length > 8) {
+            return;
+          }
+
+          finishUploadedFiles = [...finishUploadedFiles, ...Array.from(files)].slice(0, 8);
+          updateFinishMediaPreview();
+        });
       }
 
-      if (finishBookForm) {
-        finishBookForm.addEventListener("submit", async (e) => {
-          e.preventDefault();
-
+      if (finishSubmitBook) {
+        finishSubmitBook.addEventListener("click", async () => {
           if (!currentFinishingBookId) return;
 
-          const finishDate = (document.getElementById("finishDate") as HTMLInputElement).value;
-          const notes = (document.getElementById("finishNotes") as HTMLTextAreaElement).value;
-          const favourite = (document.getElementById("favouriteSections") as HTMLTextAreaElement).value;
+          const startDate = (document.getElementById("finishStartedReading") as HTMLInputElement).value;
+          const finishDate = (document.getElementById("finishFinishedReading") as HTMLInputElement).value;
+          const notes = (document.getElementById("finishBookNotes") as HTMLTextAreaElement).value;
+          const favourite = (document.getElementById("finishFavouriteSections") as HTMLTextAreaElement).value;
 
-          await finishBook(currentFinishingBookId, finishDate, notes, favourite);
+          await finishBook(currentFinishingBookId, startDate, finishDate, notes, favourite);
         });
       }
 
