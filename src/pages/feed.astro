@@ -9,7 +9,7 @@ import Header from "../components/Header.astro";
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
-    <title>de.list - feed</title>
+    <title>de.list</title>
   </head>
   <body class="flex flex-col items-center min-h-screen bg-[#feebf6]">
     <Header />
@@ -18,12 +18,12 @@ import Header from "../components/Header.astro";
       <h2 class="titles text-4xl text-center mb-8 text-[#687fe5]">what are ur friends reading</h2>
 
       <div id="feedContainer" class="space-y-6">
-        <div class="text-center subtitle text-lg text-[#687fe5] opacity-75">loading your friends' reading activity...</div>
+        <div class="text-center subtitle text-lg text-[#687fe5] opacity-90">loading your friends' reading activity...</div>
       </div>
     </div>
 
     <div id="bookDetailModal" class="fixed inset-0 flex items-center justify-center hidden z-50">
-      <div class="bg-[#feebf6] text-[#687fe5] p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto border-2 border-[#687fe5]">
+      <div class="bg-[#feebf6] text-[#687fe5] p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto border-b-2 border-[#687fe5]">
         <div class="flex justify-between items-start mb-6">
           <div></div>
           <button id="closeDetailModal" class="navbar text-3xl"> <span class="text-xl">(close)</span></button>
@@ -33,28 +33,28 @@ import Header from "../components/Header.astro";
           <div class="flex-shrink-0 w-48">
             <div class="flex flex-col items-center">
               <div id="detailBookCover" class="w-full h-72 bg-[#687fe5] flex items-center justify-center text-[#feebf6] text-lg mb-4"></div>
-              <h1 id="detailBookTitle" class="w-full text-center titles text-2xl mb-2">Book Title</h1>
-              <p id="detailBookAuthor" class="subtitle text-lg text-center mb-4">Author</p>
-              <p id="detailFriendName" class="subtitle text-sm text-center opacity-75 mb-4">read by: @friend</p>
+              <h1 id="detailBookTitle" class="w-full text-center subtitle text-2xl mb-2">Book Title</h1>
+              <p id="detailBookAuthor" class="navbar text-lg text-center mb-4">Author</p>
+              <p id="detailFriendName" class="subtitle text-sm text-center opacity-90 mb-4">read by: @friend</p>
             </div>
           </div>
 
           <div class="flex-1">
             <div class="mb-6">
-              <label class="block subtitle text-lg mb-2">their notes:</label>
+              <label class="block navbar text-lg mb-2">their notes:</label>
               <div id="friendNotes" class="w-full min-h-32 bg-transparent border-2 border-[#687fe5] p-4 subtitle">No notes available</div>
             </div>
 
             <div class="mb-6">
-              <label class="block subtitle text-lg mb-2">their favourite sections:</label>
+              <label class="block navbar text-lg mb-2">their favourite sections:</label>
               <div id="friendFavourites" class="w-full min-h-24 bg-transparent border-2 border-[#687fe5] p-4 subtitle">
-                No favourite sections
+                No favourite sections :(
               </div>
             </div>
 
             <div class="mb-6">
               <div class="flex items-center gap-4 text-sm subtitle">
-                <span id="readingDates">Reading dates not available</span>
+                <span id="readingDates">no reading dates :(</span>
               </div>
             </div>
 
@@ -71,13 +71,13 @@ import Header from "../components/Header.astro";
     <div id="addToListModal" class="fixed inset-0 flex items-center justify-center hidden z-50">
       <div class="bg-[#feebf6] text-[#687fe5] p-8 max-w-2xl w-full mx-4 border-2 border-[#687fe5]">
         <div class="flex justify-between items-start mb-6">
-          <h3 class="titles text-2xl">Add to Your Reading List</h3>
+          <h3 class="titles text-2xl">add to my list</h3>
           <button id="closeAddModal" class="navbar text-3xl"> <span class="text-xl">(close)</span></button>
         </div>
 
         <div class="space-y-4">
           <div>
-            <label class="block subtitle text-lg mb-2">My notes about it:</label>
+            <label class="block subtitle text-lg mb-2">my notes about it!</label>
             <textarea
               id="myBookNotes"
               class="w-full h-32 bg-transparent border-2 border-[#687fe5] p-4 subtitle resize-none outline-none"
@@ -209,8 +209,8 @@ import Header from "../components/Header.astro";
         } else {
           feedContainer.innerHTML = `
             <div class="text-center space-y-4">
-              <p class="subtitle text-lg text-[#687fe5] opacity-75">aw :/ no reading activity from your friends yet</p>
-              <p class="subtitle text-sm text-[#687fe5] opacity-50">(psst...you should defo add some friends to see what they're reading! maybe start with @lou (563535))</p>
+              <p class="subtitle text-lg text-[#687fe5] opacity-90">aw :/ no reading activity from your friends yet</p>
+              <p class="subtitle text-sm text-[#687fe5] opacity-90">(psst...you should defo add some friends to see what they're reading! maybe start with @lou (563535))</p>
               <a href="/friends" class="inline-block border-2 border-[#687fe5] text-[#687fe5] px-6 py-2 navbar text-lg">
                 add friends
               </a>
@@ -229,61 +229,135 @@ import Header from "../components/Header.astro";
 
     function renderFeed(books: any[]) {
       const feedHtml = books
-        .map(
-          (book) => `
-        <div class="feed-item bg-[#feebf6] border-2 border-[#687fe5] p-6 cursor-pointer" data-book='${JSON.stringify(book)}'>
+        .map((book) => {
+          const isFinished = !!book.finished;
+          const cursorClass = isFinished ? "cursor-pointer" : "cursor-default";
+          const statusText = !book.started ? "want to read" : !book.finished ? "currently reading" : "read";
+          const activityText = !book.started
+            ? `@${book.friend_name} wants to read`
+            : !book.finished
+              ? `@${book.friend_name} is reading`
+              : `@${book.friend_name} read`;
+
+          return `
+        <div class="feed-item bg-[#feebf6] border-b-2 border-[#687fe5] p-6 ${cursorClass}" data-book='${JSON.stringify(book)}' data-finished="${isFinished}">
           <div class="flex gap-6">
             <div class="flex-shrink-0">
-              <div class="w-24 h-36 bg-[#687fe5] flex items-center justify-center text-[#feebf6] text-sm">
-                ${book.cover_url ? `<img src="${book.cover_url}" alt="${book.title}" class="w-full h-full object-cover" />` : "BOOK COVER"}
+              <div
+                class="w-24 h-36 bg-[#687fe5] flex items-center justify-center text-[#feebf6] text-xs text-center book-cover-container ${book.cover_url ? "" : "missing-cover"}"
+                data-book-title="${book.title}"
+                data-book-author="${book.author || ""}"
+              >
+                ${book.cover_url ? `<img src="${book.cover_url}" alt="${book.title}" class="w-full h-full object-cover" />` : "loading..."}
               </div>
             </div>
             <div class="flex-1">
-              <h3 class="titles text-xl text-[#687fe5] mb-2">${book.title}</h3>
-              <p class="subtitle text-lg text-[#687fe5] opacity-75 mb-2">${book.author || "Unknown Author"}</p>
-              <p class="subtitle text-sm text-[#687fe5] opacity-60 mb-3">read by @${book.friend_name}</p>
-              <p class="subtitle text-sm text-[#687fe5] mb-3">
-                ${book.notes ? book.notes.substring(0, 150) + (book.notes.length > 150 ? "..." : "") : "No notes available"}
-              </p>
+              <p class="subtitle text-sm text-[#687fe5] opacity-90 mb-3">${activityText}</p>
+              <h3 class="subtitle text-2xl text-[#687fe5] ">${book.title}</h3>
+              <p class="navbar text-lg text-[#687fe5] opacity-90 mb-4">${book.author || "Unknown Author"}</p>
+              ${
+                book.notes && isFinished
+                  ? `<p class="subtitle text-sm text-[#687fe5] mb-3">
+                  ${book.notes.substring(0, 150)}${book.notes.length > 150 ? "..." : ""}</p>`
+                  : ""
+              }
             </div>
           </div>
-          <div class="mt-3 flex gap-4 text-xs subtitle text-[#687fe5] opacity-50">
-            ${book.started ? `Started: ${new Date(book.started).toLocaleDateString()}` : ""}
-            ${book.finished ? ` • Finished: ${new Date(book.finished).toLocaleDateString()}` : ""}
+          <div class="mt-3 flex gap-4 text-xs subtitle text-[#687fe5] opacity-90">
+            ${book.started ? `started: ${new Date(book.started).toLocaleDateString()}` : ""}
+            ${book.finished ? ` | finished: ${new Date(book.finished).toLocaleDateString()}` : ""}
           </div>
         </div>
-      `
-        )
+      `;
+        })
         .join("");
 
       feedContainer.innerHTML = feedHtml;
 
+      // Fetch and display covers for books that are missing them
+      updateCoverImages();
+
       document.querySelectorAll(".feed-item").forEach((item) => {
         item.addEventListener("click", () => {
-          const book = JSON.parse((item as HTMLElement).dataset.book || "{}");
-          openBookDetail(book);
+          const isFinished = (item as HTMLElement).dataset.finished === "true";
+          if (isFinished) {
+            const book = JSON.parse((item as HTMLElement).dataset.book || "{}");
+            openBookDetail(book);
+          }
         });
       });
     }
 
-    function openBookDetail(book: any) {
+    async function fetchBookCover(title: string, author?: string): Promise<string | null> {
+      try {
+        const query = author ? `${title} ${author}` : title;
+        const encodedQuery = encodeURIComponent(query);
+
+        const searchResponse = await fetch(`https://openlibrary.org/search.json?q=${encodedQuery}&limit=1`);
+        const searchData = await searchResponse.json();
+
+        if (searchData.docs && searchData.docs.length > 0) {
+          const book = searchData.docs[0];
+
+          if (book.cover_i) {
+            return `https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg`;
+          }
+          if (book.isbn && book.isbn.length > 0) {
+            const isbn = book.isbn[0];
+            return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
+          }
+        }
+
+        return null;
+      } catch (error) {
+        console.error("Error fetching book cover:", error);
+        return null;
+      }
+    }
+
+    function updateCoverImages() {
+      document.querySelectorAll(".book-cover-container.missing-cover").forEach(async (container) => {
+        const title = (container as HTMLElement).dataset.bookTitle;
+        const author = (container as HTMLElement).dataset.bookAuthor;
+
+        if (!title) return;
+
+        const coverUrl = await fetchBookCover(title, author || undefined);
+
+        if (coverUrl) {
+          container.innerHTML = `<img src="${coverUrl}" alt="${title}" class="w-full h-full object-cover" />`;
+        } else {
+          container.innerHTML = "book<br/>cover";
+        }
+
+        container.classList.remove("missing-cover");
+      });
+    }
+
+    async function openBookDetail(book: any) {
       currentBook = book;
 
       const modalBookCover = document.getElementById("detailBookCover") as HTMLElement;
       if (book.cover_url) {
         modalBookCover.innerHTML = `<img src="${book.cover_url}" alt="${book.title}" class="w-full h-full object-cover" />`;
       } else {
-        modalBookCover.innerHTML = `<div class="text-white text-center">BOOK COVER</div>`;
+        // try to fetch a cover dynamically
+        const fetchedCover = await fetchBookCover(book.title, book.author);
+        if (fetchedCover) {
+          modalBookCover.innerHTML = `<img src="${fetchedCover}" alt="${book.title}" class="w-full h-full object-cover" />`;
+        } else {
+          modalBookCover.innerHTML = `<div class="text-white text-center">BOOK COVER</div>`;
+        }
       }
 
       (document.getElementById("detailBookTitle") as HTMLElement).innerText = book.title;
       (document.getElementById("detailBookAuthor") as HTMLElement).innerText = book.author || "Unknown Author";
       (document.getElementById("detailFriendName") as HTMLElement).innerText = `read by: @${book.friend_name}`;
 
-      (document.getElementById("friendNotes") as HTMLElement).innerText = book.notes || "No notes available";
-      (document.getElementById("friendFavourites") as HTMLElement).innerText = book.favourite || "No favourite sections";
+      (document.getElementById("friendNotes") as HTMLElement).innerText = book.notes || "no notes :/";
+      (document.getElementById("friendFavourites") as HTMLElement).innerText = book.favourite || "no favourite sections :sob:";
 
-      let datesText = "Reading dates not available";
+      let datesText = "no reading dates :/";
       if (book.started || book.finished) {
         const parts = [];
         if (book.started) parts.push(`Started: ${new Date(book.started).toLocaleDateString()}`);

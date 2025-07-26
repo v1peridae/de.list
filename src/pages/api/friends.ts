@@ -224,7 +224,7 @@ export async function GET({ request }: { request: Request }) {
         favourite: book.favourite,
         started: book.started,
         finished: book.finished,
-        cover_url: null,
+        cover_url: book.coverUrl,
       }));
 
       return new Response(JSON.stringify({ user, books: userBooks }), {
@@ -276,7 +276,7 @@ export async function GET({ request }: { request: Request }) {
         finished: book.finished,
         friend_name: book.user.username || book.user.displayName,
         friend_full_name: book.user.name,
-        cover_url: null,
+        cover_url: book.coverUrl,
       }));
 
       return new Response(JSON.stringify({ books: feedBooks }), {
