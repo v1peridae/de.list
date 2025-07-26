@@ -24,6 +24,8 @@ i built it because i have a hard time using goodreads and i really wanted to do 
 
 ![](breh/image1.png)
 
+> who doesn't like profile customisation :P
+
 ### have a sick friend code !! pssst...please add me, i want friends! </3
 
 ![](breh/image2.png)
@@ -34,11 +36,13 @@ i built it because i have a hard time using goodreads and i really wanted to do 
 
 ![](breh/image3.png)
 
+> and their reviews on the cool stuff they're reading too!
+
 ### nerd stuff?? :P
 
 built with astro, react, tailwind<br>
-postgres via prisma, my beloved<br>
-firebase for auth
+postgres via prisma my beloved<br>
+1/2 asleep lou and now current lou regrets what they did
 
 ### if you wanna run it locally....
 
