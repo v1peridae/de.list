@@ -1,9 +1,11 @@
 import { getAuth } from "firebase-admin/auth";
 import { PrismaClient } from "@prisma/client";
+import { ensureFirebaseAdminApp } from "../../server/firebaseAdmin";
 
 const prisma = new PrismaClient();
 
 async function authenticateUser(request: Request) {
+  ensureFirebaseAdminApp();
   const authHeader = request.headers.get("Authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     throw new Error("Unauthorized");
@@ -19,7 +21,8 @@ export async function POST({ request }: { request: Request }) {
     const { userId } = await authenticateUser(request);
     const body = await request.json();
 
-    const { title, author, coverUrl, started, finished, notes, favourite } = body;
+    const { title, author, coverUrl, started, finished, notes, favourite } =
+      body;
 
     if (!title) {
       return new Response(JSON.stringify({ error: "Title is required" }), {
@@ -49,7 +52,7 @@ export async function POST({ request }: { request: Request }) {
       {
         status: 201,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   } catch (error) {
     console.error("Error saving book:", error);
@@ -87,7 +90,16 @@ export async function PUT({ request }: { request: Request }) {
     const { userId } = await authenticateUser(request);
     const body = await request.json();
 
-    const { bookId, title, author, coverUrl, started, finished, notes, favourite } = body;
+    const {
+      bookId,
+      title,
+      author,
+      coverUrl,
+      started,
+      finished,
+      notes,
+      favourite,
+    } = body;
 
     if (!bookId) {
       return new Response(JSON.stringify({ error: "Book ID is required" }), {
@@ -111,8 +123,10 @@ export async function PUT({ request }: { request: Request }) {
     if (title !== undefined) updateData.title = title;
     if (author !== undefined) updateData.author = author;
     if (coverUrl !== undefined) updateData.coverUrl = coverUrl;
-    if (started !== undefined) updateData.started = started ? new Date(started) : null;
-    if (finished !== undefined) updateData.finished = finished ? new Date(finished) : null;
+    if (started !== undefined)
+      updateData.started = started ? new Date(started) : null;
+    if (finished !== undefined)
+      updateData.finished = finished ? new Date(finished) : null;
     if (notes !== undefined) updateData.notes = notes;
     if (favourite !== undefined) updateData.favourite = favourite;
 
@@ -129,7 +143,7 @@ export async function PUT({ request }: { request: Request }) {
       {
         status: 200,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   } catch (error) {
     console.error("Error updating book:", error);
@@ -176,7 +190,7 @@ export async function DELETE({ request }: { request: Request }) {
       {
         status: 200,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   } catch (error) {
     console.error("Error deleting book:", error);

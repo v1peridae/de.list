@@ -1,29 +1,6 @@
-import pkg from "@prisma/client";
-const { PrismaClient } = pkg;
-import { initializeApp, cert, getApps } from "firebase-admin/app";
+import { PrismaClient } from "@prisma/client";
 import { getAuth } from "firebase-admin/auth";
-
-if (!getApps().length) {
-  const privateKey = (import.meta.env.FIREBASE_PRIVATE_KEY || process.env.FIREBASE_PRIVATE_KEY) as string | undefined;
-
-  if (privateKey && privateKey.trim() !== "") {
-    const serviceAccount = {
-      project_id:
-        import.meta.env.FIREBASE_PROJECT_ID ||
-        process.env.FIREBASE_PROJECT_ID ||
-        process.env.PUBLIC_FIREBASE_PROJECT_ID ||
-        import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
-      client_email: import.meta.env.FIREBASE_CLIENT_EMAIL || process.env.FIREBASE_CLIENT_EMAIL,
-      private_key: privateKey.replace(/\\n/g, "\n"),
-    } as const;
-
-    initializeApp({
-      credential: cert(serviceAccount as any),
-    });
-  } else {
-    initializeApp();
-  }
-}
+import { ensureFirebaseAdminApp } from "../../server/firebaseAdmin";
 
 const prisma = new PrismaClient();
 
@@ -32,6 +9,7 @@ function generateFriendCode(): string {
 }
 
 async function authenticateUser(request: Request) {
+  ensureFirebaseAdminApp();
   const authHeader = request.headers.get("Authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     throw new Error("Unauthorized");
@@ -56,10 +34,17 @@ export async function GET({ request }: { request: Request }) {
         });
       }
       if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-        return new Response(JSON.stringify({ available: false, error: "Username can only contain letters, numbers, and underscores" }), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({
+            available: false,
+            error:
+              "Username can only contain letters, numbers, and underscores",
+          }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
       }
       const user = await prisma.user.findUnique({
         where: { username },
@@ -124,13 +109,19 @@ export async function GET({ request }: { request: Request }) {
           where: { id: userId },
           update: {
             friendCode: friendCode!,
-            displayName: user?.displayName || decodedToken.name || decodedToken.email?.split("@")[0],
+            displayName:
+              user?.displayName ||
+              decodedToken.name ||
+              decodedToken.email?.split("@")[0],
           },
           create: {
             id: userId,
             email: decodedToken.email || "",
             friendCode: friendCode!,
-            displayName: decodedToken.name || decodedToken.email?.split("@")[0] || "Anonymous",
+            displayName:
+              decodedToken.name ||
+              decodedToken.email?.split("@")[0] ||
+              "Anonymous",
           },
           select: { friendCode: true, displayName: true, email: true },
         });
@@ -144,7 +135,7 @@ export async function GET({ request }: { request: Request }) {
         {
           status: 200,
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
     }
 
@@ -188,7 +179,7 @@ export async function GET({ request }: { request: Request }) {
         {
           status: 200,
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
     }
 
@@ -211,10 +202,13 @@ export async function GET({ request }: { request: Request }) {
       });
 
       if (!friendship && targetUserId !== userId) {
-        return new Response(JSON.stringify({ error: "You can only view friends' profiles" }), {
-          status: 403,
-          headers: { "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({ error: "You can only view friends' profiles" }),
+          {
+            status: 403,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
       }
 
       const user = await prisma.user.findUnique({
@@ -265,7 +259,9 @@ export async function GET({ request }: { request: Request }) {
         select: { friendId: true },
       });
 
-      const friendIds = friendships.map((f: { friendId: string }) => f.friendId);
+      const friendIds = friendships.map(
+        (f: { friendId: string }) => f.friendId,
+      );
 
       if (friendIds.length === 0) {
         return new Response(JSON.stringify({ books: [] }), {
@@ -368,10 +364,13 @@ export async function POST({ request }: { request: Request }) {
         });
 
         if (existingUser && existingUser.id !== userId) {
-          return new Response(JSON.stringify({ error: "Username is already taken" }), {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "Username is already taken" }),
+            {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
       }
 
@@ -401,7 +400,11 @@ export async function POST({ request }: { request: Request }) {
           email: decodedToken.email || "",
           friendCode: friendCode!,
           name: name || decodedToken.name || undefined,
-          displayName: displayName || decodedToken.name || decodedToken.email?.split("@")[0] || undefined,
+          displayName:
+            displayName ||
+            decodedToken.name ||
+            decodedToken.email?.split("@")[0] ||
+            undefined,
           username: username || undefined,
           bio: bio || undefined,
           profilePic: profilePic || undefined,
@@ -426,7 +429,7 @@ export async function POST({ request }: { request: Request }) {
         {
           status: 200,
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
     }
 
@@ -443,7 +446,9 @@ export async function POST({ request }: { request: Request }) {
         where: {
           userId,
           title: { equals: title, mode: "insensitive" },
-          ...(author ? { author: { equals: author, mode: "insensitive" } } : { author: null }),
+          ...(author
+            ? { author: { equals: author, mode: "insensitive" } }
+            : { author: null }),
         },
       });
 
@@ -477,7 +482,7 @@ export async function POST({ request }: { request: Request }) {
         {
           status: 200,
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
     }
 
@@ -502,10 +507,13 @@ export async function POST({ request }: { request: Request }) {
     }
 
     if (friend.id === userId) {
-      return new Response(JSON.stringify({ error: "Cannot add yourself as a friend" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "Cannot add yourself as a friend" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     const existingFriendship = await prisma.friendship.findUnique({
@@ -550,7 +558,7 @@ export async function POST({ request }: { request: Request }) {
       {
         status: 200,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   } catch (error) {
     console.error("POST /api/friends error:", error);
@@ -596,7 +604,7 @@ export async function DELETE({ request }: { request: Request }) {
       {
         status: 200,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   } catch (error) {
     console.error("DELETE /api/friends error:", error);
